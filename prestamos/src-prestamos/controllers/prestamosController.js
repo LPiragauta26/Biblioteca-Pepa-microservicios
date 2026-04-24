@@ -74,9 +74,9 @@ router.post('/prestamos', async (req, res) => {
         if (!TIEMPOS_DEMO[tipo]) {
             return res.status(400).json({ error: 'Tipo inválido. Use: domiciliario, sala o convenio' });
         }
-        const responseUsuario = await axios.get(`http://localhost:3001/usuarios/${usuario}`);
+        const responseUsuario = await axios.get(`http://usuarios:3001/usuarios/${usuario}`);
         const { nombre, email } = responseUsuario.data;
-        const responseLibro = await axios.get(`http://localhost:3002/libros/${codigo_libro}`);
+        const responseLibro = await axios.get(`http://libros:3002/libros/${codigo_libro}`);
         const { titulo, cantidad_disponible } = responseLibro.data;
         if (cantidad_disponible <= 0) {
             return res.status(400).json({ error: 'No hay disponibilidad del libro' });
@@ -101,11 +101,11 @@ router.put('/prestamos/:id/aprobar', async (req, res) => {
         const prestamo = await prestamosModel.obtenerPrestamosPorId(id);
         if (!prestamo) return res.status(404).json({ error: "Préstamo no encontrado" });
         if (prestamo.estado !== 'pendiente') return res.status(400).json({ error: `No se puede aprobar un préstamo en estado '${prestamo.estado}'` });
-        const responseLibro = await axios.get(`http://localhost:3002/libros/${prestamo.codigo_libro}`);
+        const responseLibro = await axios.get(`http://libros:3002/libros/${prestamo.codigo_libro}`);
         const { cantidad_disponible } = responseLibro.data;
         if (cantidad_disponible <= 0) return res.status(400).json({ error: 'Sin stock disponible' });
         await prestamosModel.cambiarEstado(id, 'activo');
-        await axios.put(`http://localhost:3002/libros/${prestamo.codigo_libro}`, {
+        await axios.put(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
             cantidad_disponible: cantidad_disponible - 1
         });
         res.status(200).json({ mensaje: "Préstamo aprobado. Stock actualizado." });
@@ -133,10 +133,10 @@ router.put('/prestamos/:id/anular', async (req, res) => {
         const prestamo = await prestamosModel.obtenerPrestamosPorId(id);
         if (!prestamo) return res.status(404).json({ error: "Préstamo no encontrado" });
         if (!['activo', 'vencido'].includes(prestamo.estado)) return res.status(400).json({ error: `No se puede anular en estado '${prestamo.estado}'` });
-        const responseLibro = await axios.get(`http://localhost:3002/libros/${prestamo.codigo_libro}`);
+        const responseLibro = await axios.get(`http://libros:3002/libros/${prestamo.codigo_libro}`);
         const { cantidad_disponible } = responseLibro.data;
         await prestamosModel.cambiarEstado(id, 'anulado');
-        await axios.put(`http://localhost:3002/libros/${prestamo.codigo_libro}`, {
+        await axios.put(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
             cantidad_disponible: cantidad_disponible + 1
         });
         res.status(200).json({ mensaje: "Préstamo anulado. Stock restaurado." });
@@ -151,10 +151,10 @@ router.put('/prestamos/:id/confirmar-devolucion', async (req, res) => {
         const prestamo = await prestamosModel.obtenerPrestamosPorId(id);
         if (!prestamo) return res.status(404).json({ error: "Préstamo no encontrado" });
         if (!['activo', 'vencido'].includes(prestamo.estado)) return res.status(400).json({ error: `No se puede devolver en estado '${prestamo.estado}'` });
-        const responseLibro = await axios.get(`http://localhost:3002/libros/${prestamo.codigo_libro}`);
+        const responseLibro = await axios.get(`http://libros:3002/libros/${prestamo.codigo_libro}`);
         const { cantidad_disponible } = responseLibro.data;
         await prestamosModel.confirmarDevolucion(id);
-        await axios.put(`http://localhost:3002/libros/${prestamo.codigo_libro}`, {
+        await axios.put(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
             cantidad_disponible: cantidad_disponible + 1
         });
         res.status(200).json({ mensaje: "Devolución confirmada. Stock restaurado." });

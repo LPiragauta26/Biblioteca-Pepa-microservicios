@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Insertar Préstamo - Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../config.js"></script>
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; }
+        .nav-link { color: #89b4d8 !important; }
+        .nav-link:hover { color: #c8a96e !important; }
+        .header-section { background-color: #0d2137; padding: 30px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .header-section h2 { color: #c8a96e; font-size: 24px; }
+        .header-section p { color: #89b4d8; font-size: 13px; margin: 0; }
+        .card-form { background: white; border-radius: 12px; border: 1px solid #dee2e6; padding: 30px; }
+        .section-label { font-size: 12px; font-weight: bold; color: #6c757d; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #0d2137; }
+        .form-label { font-size: 14px; font-weight: bold; color: #0d2137; }
+        .btn-guardar { background-color: #0d2137; color: #c8a96e; border: none; padding: 10px 30px; border-radius: 8px; font-weight: bold; }
+        .btn-guardar:hover { background-color: #1a3a5c; color: #c8a96e; }
+        .info-box { background: #f0f4f8; border-radius: 8px; padding: 10px 14px; font-size: 13px; border-left: 4px solid #3b6d11; margin-top: 6px; display: none; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="../index.html">📚 Biblioteca</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="ver_prestamos.html">Ver Préstamos</a></li>
+                <li class="nav-item"><a class="nav-link" href="insertar_prestamos.html">Insertar</a></li>
+                <li class="nav-item"><a class="nav-link" href="consultar_prestamos.html">Consultar</a></li>
+                <li class="nav-item"><a class="nav-link" href="borrar_prestamos.html">Eliminar</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="header-section">
+    <div style="font-size: 40px; margin-bottom: 10px;">➕</div>
+    <h2>Registrar Préstamo</h2>
+    <p>El admin registra el préstamo directamente — queda activo de inmediato</p>
+</div>
+
+<div class="container mt-4">
+    <div class="card-form" style="max-width:600px;margin:0 auto;">
+
+        <div class="section-label">👤 Usuario</div>
+        <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="usuario" placeholder="Ej: cperez">
+                <button class="btn btn-outline-secondary" onclick="verificarUsuario()">Verificar</button>
+            </div>
+            <div class="info-box" id="info-usuario">👤 <strong id="u-nombre"></strong> — <span id="u-email"></span></div>
+        </div>
+
+        <div class="section-label">📗 Libro</div>
+        <div class="mb-3">
+            <label class="form-label">Código del libro</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="codigo_libro" placeholder="Ej: L001">
+                <button class="btn btn-outline-secondary" onclick="verificarLibro()">Verificar</button>
+            </div>
+            <div class="info-box" id="info-libro">📗 <strong id="l-titulo"></strong> — Disponibles: <span id="l-cantidad"></span></div>
+        </div>
+
+        <div class="section-label">📅 Tipo de préstamo</div>
+        <div class="mb-4">
+            <select class="form-select" id="tipo_prestamo">
+                <option value="">-- Seleccionar --</option>
+                <option value="domiciliario">Domiciliario (1 min demo)</option>
+                <option value="sala">Sala (1.5 min demo)</option>
+                <option value="convenio">Convenio (2 min demo)</option>
+            </select>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button onclick="guardarPrestamo()" class="btn-guardar btn">💾 Registrar Préstamo</button>
+            <a href="../Panel-admin.html" class="btn btn-secondary">← Volver</a>
+        </div>
+
+        <div id="mensaje" class="alert mt-4 d-none"></div>
+    </div>
+</div>
+
+<div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function verificarUsuario() {
+        const usuario = document.getElementById('usuario').value.trim();
+        if (!usuario) return;
+        fetch(API_USUARIOS + '/usuarios/' + usuario)
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(d => {
+                document.getElementById('u-nombre').textContent = d.nombre;
+                document.getElementById('u-email').textContent  = d.email;
+                document.getElementById('info-usuario').style.display = 'block';
+            })
+            .catch(() => { document.getElementById('info-usuario').style.display = 'none'; showMsg('❌ Usuario no encontrado', 'danger'); });
+    }
+
+    function verificarLibro() {
+        const codigo = document.getElementById('codigo_libro').value.trim();
+        if (!codigo) return;
+        fetch(API_LIBROS + '/libros/' + codigo)
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(d => {
+                document.getElementById('l-titulo').textContent   = d.titulo;
+                document.getElementById('l-cantidad').textContent = d.cantidad_disponible ?? 0;
+                document.getElementById('info-libro').style.display = 'block';
+                if ((d.cantidad_disponible ?? 0) <= 0) showMsg('⚠️ Este libro no tiene stock disponible', 'warning');
+            })
+            .catch(() => { document.getElementById('info-libro').style.display = 'none'; showMsg('❌ Libro no encontrado', 'danger'); });
+    }
+
+    async function guardarPrestamo() {
+        const usuario      = document.getElementById('usuario').value.trim();
+        const codigo_libro = document.getElementById('codigo_libro').value.trim();
+        const tipo_prestamo = document.getElementById('tipo_prestamo').value;
+
+        if (!usuario || !codigo_libro || !tipo_prestamo) {
+            showMsg('⚠️ Completa todos los campos', 'warning');
+            return;
+        }
+
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario, codigo_libro, tipo_prestamo })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMsg('✅ ' + data.mensaje, 'success');
+                document.getElementById('usuario').value       = '';
+                document.getElementById('codigo_libro').value  = '';
+                document.getElementById('tipo_prestamo').value = '';
+                document.getElementById('info-usuario').style.display = 'none';
+                document.getElementById('info-libro').style.display   = 'none';
+            } else {
+                showMsg('❌ ' + (data.error || 'Error al registrar'), 'danger');
+            }
+        } catch { showMsg('❌ Error de conexión', 'danger'); }
+    }
+
+    function showMsg(msg, tipo) {
+        const el = document.getElementById('mensaje');
+        el.className = 'alert alert-' + tipo;
+        el.textContent = msg;
+        el.classList.remove('d-none');
+    }
+</script>
+</body>
+</html>

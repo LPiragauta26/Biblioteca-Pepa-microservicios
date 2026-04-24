@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Consultar Préstamo - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; }
+        .nav-link { color: #89b4d8 !important; }
+        .nav-link:hover { color: #c8a96e !important; }
+        .header-section { background-color: #0d2137; padding: 30px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .header-section h2 { color: #c8a96e; font-size: 24px; }
+        .header-section p { color: #89b4d8; font-size: 13px; margin: 0; }
+        .card-form { background: white; border-radius: 12px; border: 1px solid #dee2e6; padding: 30px; }
+        .section-label { font-size: 12px; font-weight: bold; color: #6c757d; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #185fa5; }
+        .btn-buscar { background-color: #0d2137; color: #c8a96e; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-buscar:hover { background-color: #1a3a5c; color: #c8a96e; }
+        .badge-activo { background-color: #185fa5; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .badge-vencido { background-color: #a32d2d; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .badge-devuelto { background-color: #3b6d11; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .badge-tipo { background-color: #0d2137; color: #c8a96e; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .resultado-card { background: white; border-radius: 12px; border: 1px solid #dee2e6; padding: 24px; border-left: 4px solid #185fa5; margin-bottom: 12px; }
+        .resultado-card.vencido { border-left-color: #a32d2d; }
+        .resultado-card.devuelto { border-left-color: #3b6d11; }
+        .dato-label { font-size: 12px; color: #6c757d; margin-bottom: 2px; }
+        .dato-valor { font-size: 15px; font-weight: bold; color: #0d2137; margin-bottom: 12px; }
+        .modo-tab { display: flex; gap: 10px; margin-bottom: 20px; }
+        .modo-btn { padding: 8px 20px; border-radius: 8px; border: 2px solid #dee2e6; background: white; font-weight: bold; font-size: 13px; color: #6c757d; cursor: pointer; transition: all 0.2s; }
+        .modo-btn.active { border-color: #0d2137; background: #0d2137; color: #c8a96e; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/biblioteca/Panel-admin.html">📚 Biblioteca — Admin</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/biblioteca/Panel-admin.html">← Panel</a></li>
+                <li class="nav-item"><a class="nav-link" href="ver_prestamos.html">Ver todos</a></li>
+                <li class="nav-item"><a class="nav-link" href="insertar_prestamos.html">Insertar</a></li>
+                <li class="nav-item"><a class="nav-link" href="editar_prestamos.html">Editar</a></li>
+                <li class="nav-item"><a class="nav-link" href="borrar_prestamos.html">Eliminar</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="header-section">
+    <div style="font-size:40px;margin-bottom:10px;">🔍</div>
+    <h2>Consultar Préstamo</h2>
+    <p>Busca por ID del préstamo o por nombre de usuario</p>
+</div>
+
+<div class="container mt-4">
+    <div id="alerta"></div>
+
+    <div class="card-form mb-4">
+        <!-- Selector de modo -->
+        <div class="modo-tab">
+            <button class="modo-btn active" id="btn-modo-id" onclick="cambiarModo('id')">🔢 Buscar por ID</button>
+            <button class="modo-btn" id="btn-modo-usuario" onclick="cambiarModo('usuario')">👤 Buscar por Usuario</button>
+        </div>
+
+        <!-- Buscar por ID -->
+        <div id="busqueda-id">
+            <div class="section-label">🔎 ID del préstamo</div>
+            <div class="d-flex gap-2">
+                <input type="number" class="form-control" id="buscar-id" placeholder="Ej: 1" min="1">
+                <button onclick="buscarPorId()" class="btn-buscar btn">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Buscar por usuario -->
+        <div id="busqueda-usuario" style="display:none;">
+            <div class="section-label">🔎 Nombre de usuario</div>
+            <div class="d-flex gap-2">
+                <input type="text" class="form-control" id="buscar-usuario" placeholder="Ej: jgarcia">
+                <button onclick="buscarPorUsuario()" class="btn-buscar btn">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado por ID -->
+    <div id="resultado-id" class="d-none">
+        <div class="section-label">📋 Préstamo encontrado</div>
+        <div class="resultado-card" id="card-id">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div style="font-size:20px;font-weight:bold;color:#0d2137;" id="r-titulo"></div>
+                    <div style="font-size:13px;color:#6c757d;" id="r-codigo"></div>
+                </div>
+                <div id="r-estado"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div style="font-size:12px;font-weight:bold;color:#6c757d;text-transform:uppercase;margin-bottom:10px;">👤 Usuario</div>
+                    <div class="dato-label">Usuario</div><div class="dato-valor" id="r-usuario"></div>
+                    <div class="dato-label">Nombre</div><div class="dato-valor" id="r-nombre"></div>
+                    <div class="dato-label">Email</div><div class="dato-valor" id="r-email"></div>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size:12px;font-weight:bold;color:#6c757d;text-transform:uppercase;margin-bottom:10px;">📅 Fechas</div>
+                    <div class="dato-label">Fecha préstamo</div><div class="dato-valor" id="r-fecha-p"></div>
+                    <div class="dato-label">Fecha devolución</div><div class="dato-valor" id="r-fecha-d"></div>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size:12px;font-weight:bold;color:#6c757d;text-transform:uppercase;margin-bottom:10px;">📖 Préstamo</div>
+                    <div class="dato-label">ID</div><div class="dato-valor" id="r-id"></div>
+                    <div class="dato-label">Tipo</div><div class="dato-valor" id="r-tipo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado por usuario (lista) -->
+    <div id="resultado-usuario" class="d-none">
+        <div class="section-label">📋 Préstamos del usuario</div>
+        <div id="lista-usuario"></div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="/biblioteca/Panel-admin.html" class="btn btn-secondary">← Volver al Panel</a>
+    </div>
+</div>
+
+<div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Verificar sesión admin
+    if (!sessionStorage.getItem('adminLogueado')) {
+        window.location.href = '/biblioteca/admin.html';
+    }
+
+    function cambiarModo(modo) {
+        document.getElementById('busqueda-id').style.display      = modo === 'id' ? 'block' : 'none';
+        document.getElementById('busqueda-usuario').style.display = modo === 'usuario' ? 'block' : 'none';
+        document.getElementById('btn-modo-id').classList.toggle('active', modo === 'id');
+        document.getElementById('btn-modo-usuario').classList.toggle('active', modo === 'usuario');
+        document.getElementById('resultado-id').classList.add('d-none');
+        document.getElementById('resultado-usuario').classList.add('d-none');
+        document.getElementById('alerta').innerHTML = '';
+    }
+
+    // BUSCAR POR ID
+    function buscarPorId() {
+        const id = document.getElementById('buscar-id').value.trim();
+        if (!id) { showAlerta('Ingresa un ID válido', 'warning'); return; }
+
+        fetch(API_PRESTAMOS + '/prestamos/' + id)
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(p => {
+                document.getElementById('r-titulo').textContent  = p.titulo_libro;
+                document.getElementById('r-codigo').textContent  = 'Código: ' + p.codigo_libro;
+                document.getElementById('r-usuario').textContent = p.usuario;
+                document.getElementById('r-nombre').textContent  = p.nombre_usuario;
+                document.getElementById('r-email').textContent   = p.email_usuario;
+                document.getElementById('r-fecha-p').textContent = p.fecha_prestamo;
+                document.getElementById('r-fecha-d').textContent = p.fecha_devolucion;
+                document.getElementById('r-id').textContent      = '#' + p.id;
+                document.getElementById('r-tipo').innerHTML      = '<span class="badge-tipo">' + p.tipo_prestamo + '</span>';
+                const badges = { activo:'badge-activo', vencido:'badge-vencido', devuelto:'badge-devuelto' };
+                document.getElementById('r-estado').innerHTML    = '<span class="' + (badges[p.estado]||'badge-activo') + '">' + p.estado + '</span>';
+                const card = document.getElementById('card-id');
+                card.className = 'resultado-card ' + (p.estado !== 'activo' ? p.estado : '');
+                document.getElementById('resultado-id').classList.remove('d-none');
+                document.getElementById('resultado-usuario').classList.add('d-none');
+                document.getElementById('alerta').innerHTML = '';
+            })
+            .catch(() => {
+                document.getElementById('resultado-id').classList.add('d-none');
+                showAlerta('❌ Préstamo no encontrado con ese ID', 'danger');
+            });
+    }
+
+    // BUSCAR POR USUARIO
+    function buscarPorUsuario() {
+        const usuario = document.getElementById('buscar-usuario').value.trim();
+        if (!usuario) { showAlerta('Ingresa un nombre de usuario', 'warning'); return; }
+
+        fetch(API_PRESTAMOS + '/prestamos')
+            .then(r => r.json())
+            .then(data => {
+                const prestamos = data.filter(p => p.usuario === usuario);
+                document.getElementById('resultado-id').classList.add('d-none');
+
+                if (prestamos.length === 0) {
+                    showAlerta('No se encontraron préstamos para el usuario <strong>' + usuario + '</strong>', 'warning');
+                    document.getElementById('resultado-usuario').classList.add('d-none');
+                    return;
+                }
+
+                const activos   = prestamos.filter(p => p.estado === 'activo').length;
+                const vencidos  = prestamos.filter(p => p.estado === 'vencido').length;
+                const devueltos = prestamos.filter(p => p.estado === 'devuelto').length;
+
+                let html = `
+                <div class="row mb-3">
+                    <div class="col-4"><div class="text-center p-2 bg-white rounded border"><div style="font-size:20px;font-weight:bold;color:#185fa5;">${activos}</div><div style="font-size:12px;color:#6c757d;">Activos</div></div></div>
+                    <div class="col-4"><div class="text-center p-2 bg-white rounded border"><div style="font-size:20px;font-weight:bold;color:#a32d2d;">${vencidos}</div><div style="font-size:12px;color:#6c757d;">Vencidos</div></div></div>
+                    <div class="col-4"><div class="text-center p-2 bg-white rounded border"><div style="font-size:20px;font-weight:bold;color:#3b6d11;">${devueltos}</div><div style="font-size:12px;color:#6c757d;">Devueltos</div></div></div>
+                </div>
+                <p style="font-size:13px;color:#6c757d;margin-bottom:12px;">${prestamos.length} préstamo(s) para <strong>${usuario}</strong></p>`;
+
+                prestamos.forEach(p => {
+                    const badges = { activo:'badge-activo', vencido:'badge-vencido', devuelto:'badge-devuelto' };
+                    const clases = { vencido:'vencido', devuelto:'devuelto' };
+                    html += `
+                    <div class="resultado-card ${clases[p.estado]||''}">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div style="font-size:16px;font-weight:bold;color:#0d2137;">📗 ${p.titulo_libro}</div>
+                                <div style="font-size:13px;color:#6c757d;">Código: ${p.codigo_libro}</div>
+                            </div>
+                            <span class="${badges[p.estado]||'badge-activo'}">${p.estado}</span>
+                        </div>
+                        <div class="row" style="font-size:13px;">
+                            <div class="col-md-3"><strong>ID:</strong> #${p.id}</div>
+                            <div class="col-md-3"><strong>Tipo:</strong> <span class="badge-tipo">${p.tipo_prestamo}</span></div>
+                            <div class="col-md-3"><strong>F. Préstamo:</strong> ${p.fecha_prestamo}</div>
+                            <div class="col-md-3"><strong>F. Devolución:</strong> ${p.fecha_devolucion}</div>
+                        </div>
+                    </div>`;
+                });
+
+                document.getElementById('lista-usuario').innerHTML = html;
+                document.getElementById('resultado-usuario').classList.remove('d-none');
+                document.getElementById('alerta').innerHTML = '';
+            })
+            .catch(() => showAlerta('❌ No se pudo conectar con el microservicio de préstamos', 'danger'));
+    }
+
+    document.getElementById('buscar-id').addEventListener('keypress', e => { if (e.key === 'Enter') buscarPorId(); });
+    document.getElementById('buscar-usuario').addEventListener('keypress', e => { if (e.key === 'Enter') buscarPorUsuario(); });
+
+    function showAlerta(msg, tipo) {
+        document.getElementById('alerta').innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Préstamos Vencidos - Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; }
+        .nav-link { color: #89b4d8 !important; }
+        .hero { background-color: #0d2137; padding: 30px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .hero h1 { color: #c8a96e; font-size: 24px; margin: 0; }
+        .hero p { color: #89b4d8; font-size: 14px; margin: 6px 0 0; }
+        .card-prestamo { background: white; border-radius: 10px; border: 1px solid #dee2e6; padding: 18px; margin-bottom: 12px; border-left: 4px solid #a32d2d; }
+        .badge-vencido { background-color: #a32d2d; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-tipo { background-color: #0d2137; color: #c8a96e; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .multa-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 8px; }
+        .solicitud-box { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 8px 14px; font-size: 13px; margin-top: 8px; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="../Panel-admin.html">📚 Biblioteca — Admin</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../Panel-admin.html">← Volver al Panel</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="hero">
+    <div style="font-size:40px;margin-bottom:8px;">⚠️</div>
+    <h1>Préstamos Vencidos</h1>
+    <p>Gestiona multas, devoluciones y renovaciones</p>
+</div>
+
+<div class="container mt-4">
+    <div id="alerta-global"></div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span style="font-size:13px;color:#6c757d;" id="total-vencidos">Cargando...</span>
+        <button onclick="cargar()" class="btn btn-sm" style="background:#0d2137;color:#c8a96e;">🔄 Actualizar</button>
+    </div>
+    <div id="lista"></div>
+</div>
+
+<div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (!sessionStorage.getItem('adminLogueado')) window.location.href = '../Admin.html';
+
+    function cargar() {
+        document.getElementById('lista').innerHTML = '<div class="text-center text-muted py-4">Cargando...</div>';
+        fetch(API_PRESTAMOS + '/prestamos/vencidos')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('total-vencidos').textContent = data.length + ' préstamo(s) vencido(s)';
+                if (!data.length) {
+                    document.getElementById('lista').innerHTML = `
+                        <div class="text-center text-muted py-5">
+                            <div style="font-size:50px;">✅</div>
+                            <p>No hay préstamos vencidos.</p>
+                        </div>`;
+                    return;
+                }
+
+                document.getElementById('lista').innerHTML = data.map(p => {
+                    const ahora   = new Date();
+                    const vencio  = new Date(p.fecha_devolucion);
+                    const diffSeg = Math.max(0, Math.floor((ahora - vencio) / 1000));
+                    const diffMin = Math.floor(diffSeg / 60);
+
+                    const multaHtml = `
+                        <div class="multa-box">
+                            ⚠️ <strong>Multa acumulada:</strong> $${Number(p.multa_valor).toLocaleString()}
+                            &nbsp;|&nbsp; Retraso: ${diffMin > 0 ? diffMin + ' min ' : ''}${diffSeg % 60} seg
+                            &nbsp;|&nbsp; Multa pagada: ${p.multa_pagada ? '✅ Sí' : '❌ No'}
+                        </div>`;
+
+                    const solicitudHtml = p.solicitud_devolucion
+                        ? `<div class="solicitud-box">📤 <strong>El usuario ya solicitó la devolución</strong> — confirma cuando recibas el libro físicamente.</div>`
+                        : '';
+
+                    return `
+                    <div class="card-prestamo">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div style="font-size:15px;font-weight:bold;color:#0d2137;">📗 ${p.titulo_libro}</div>
+                                <div style="font-size:13px;color:#6c757d;">Código: ${p.codigo_libro} &nbsp;|&nbsp; <span class="badge-tipo">${p.tipo_prestamo}</span></div>
+                            </div>
+                            <span class="badge-vencido">vencido</span>
+                        </div>
+                        <div class="row mb-2" style="font-size:13px;">
+                            <div class="col-md-4"><strong>Usuario:</strong> ${p.usuario}</div>
+                            <div class="col-md-4"><strong>Nombre:</strong> ${p.nombre_usuario}</div>
+                            <div class="col-md-4"><strong>Email:</strong> ${p.email_usuario}</div>
+                            <div class="col-md-4 mt-1"><strong>ID:</strong> #${p.id}</div>
+                            <div class="col-md-4 mt-1"><strong>Préstamo:</strong> ${formatFecha(p.fecha_prestamo)}</div>
+                            <div class="col-md-4 mt-1"><strong>Venció:</strong> ${formatFecha(p.fecha_devolucion)}</div>
+                        </div>
+                        ${multaHtml}
+                        ${solicitudHtml}
+                        <div class="d-flex gap-2 mt-3 flex-wrap">
+                            <button onclick="confirmarDevolucion(${p.id})" class="btn btn-sm btn-success">📥 Confirmar devolución</button>
+                            <button onclick="renovar(${p.id}, '${p.tipo_prestamo}')" class="btn btn-sm btn-warning">🔄 Renovar préstamo</button>
+                            <button onclick="anular(${p.id})" class="btn btn-sm btn-outline-danger">🚫 Anular</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            })
+            .catch(() => showGlobal('❌ Error al cargar vencidos', 'danger'));
+    }
+
+    async function confirmarDevolucion(id) {
+        if (!confirm('¿Confirmas que recibiste el libro físicamente? El stock se restaurará y la multa se cerrará.')) return;
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos/' + id + '/confirmar-devolucion', { method: 'PUT' });
+            const data = await res.json();
+            showGlobal(res.ok ? '✅ ' + data.mensaje : '❌ ' + data.error, res.ok ? 'success' : 'danger');
+            if (res.ok) cargar();
+        } catch { showGlobal('❌ Error de conexión', 'danger'); }
+    }
+
+    async function renovar(id, tipo) {
+        const tiempos = { domiciliario: '1 minuto', sala: '1.5 minutos', convenio: '2 minutos' };
+        const tiempo  = tiempos[tipo.toLowerCase()] || 'el tiempo del tipo de préstamo';
+        if (!confirm(`¿Renovar este préstamo? Se extenderá ${tiempo} más desde ahora. La multa acumulada se mantiene.`)) return;
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos/' + id + '/renovar', { method: 'PUT' });
+            const data = await res.json();
+            showGlobal(res.ok ? '✅ ' + data.mensaje : '❌ ' + data.error, res.ok ? 'success' : 'danger');
+            if (res.ok) cargar();
+        } catch { showGlobal('❌ Error de conexión', 'danger'); }
+    }
+
+    async function anular(id) {
+        if (!confirm('¿Anular este préstamo? El stock se restaurará.')) return;
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos/' + id + '/anular', { method: 'PUT' });
+            const data = await res.json();
+            showGlobal(res.ok ? '✅ ' + data.mensaje : '❌ ' + data.error, res.ok ? 'success' : 'danger');
+            if (res.ok) cargar();
+        } catch { showGlobal('❌ Error de conexión', 'danger'); }
+    }
+
+    function formatFecha(f) {
+        if (!f) return '—';
+        return new Date(f).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' });
+    }
+
+    function showGlobal(msg, tipo) {
+        document.getElementById('alerta-global').innerHTML = `<div class="alert alert-${tipo} alert-dismissible">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    }
+
+    cargar();
+</script>
+</body>
+</html>

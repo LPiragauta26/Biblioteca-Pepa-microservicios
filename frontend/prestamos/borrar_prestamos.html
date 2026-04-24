@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Eliminar Préstamo - Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; }
+        .nav-link { color: #89b4d8 !important; }
+        .nav-link:hover { color: #c8a96e !important; }
+        .header-section { background-color: #0d2137; padding: 30px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .header-section h2 { color: #c8a96e; font-size: 24px; }
+        .header-section p { color: #89b4d8; font-size: 13px; margin: 0; }
+        .card-form { background: white; border-radius: 12px; border: 1px solid #dee2e6; padding: 30px; }
+        .section-label { font-size: 12px; font-weight: bold; color: #6c757d; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #a32d2d; }
+        .btn-buscar { background-color: #0d2137; color: #c8a96e; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-buscar:hover { background-color: #1a3a5c; color: #c8a96e; }
+        .btn-eliminar { background-color: #a32d2d; color: white; border: none; padding: 10px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-eliminar:hover { background-color: #791f1f; color: white; }
+        .badge-activo { background-color: #185fa5; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .badge-vencido { background-color: #a32d2d; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .badge-devuelto { background-color: #3b6d11; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .badge-tipo { background-color: #0d2137; color: #c8a96e; padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .resultado-card { background: white; border-radius: 12px; border: 1px solid #dee2e6; padding: 24px; border-left: 4px solid #a32d2d; }
+        .dato-label { font-size: 12px; color: #6c757d; margin-bottom: 2px; }
+        .dato-valor { font-size: 15px; font-weight: bold; color: #0d2137; margin-bottom: 12px; }
+        .alerta-eliminar { background-color: #fcebeb; border: 1px solid #f7c1c1; border-radius: 10px; padding: 16px; margin-top: 16px; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">📚 Biblioteca</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="ver_prestamos.html">Ver Préstamos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="insertar_prestamos.html">Insertar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="consultar_prestamos.html">Consultar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="editar_prestamos.html">Editar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="borrar_prestamos.html">Eliminar</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+        <div style="font-size: 40px; margin-bottom: 10px;">🗑️</div>
+        <h2>Eliminar Préstamo</h2>
+        <p>Busca el préstamo por ID y elimínalo del sistema</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="container mt-4">
+
+        <!-- Buscar -->
+        <div class="card-form mb-4">
+            <div class="section-label">🔎 Buscar por ID</div>
+            <div class="d-flex gap-2">
+                <input type="number" class="form-control" id="buscar-id" placeholder="Ingresa el ID del préstamo a eliminar" />
+                <button id="btn-buscar" class="btn-buscar btn">Buscar</button>
+            </div>
+            <div id="mensaje-buscar" class="alert mt-3 d-none"></div>
+        </div>
+
+        <!-- Resultado -->
+        <div id="resultado" class="d-none">
+            <div class="section-label">📋 Préstamo encontrado</div>
+            <div class="resultado-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <div style="font-size: 20px; font-weight: bold; color: #0d2137;" id="res-titulo"></div>
+                        <div style="font-size: 13px; color: #6c757d;" id="res-codigo"></div>
+                    </div>
+                    <div id="res-estado"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div style="font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-bottom: 12px;">👤 Usuario</div>
+                        <div class="dato-label">Usuario</div>
+                        <div class="dato-valor" id="res-usuario"></div>
+                        <div class="dato-label">Nombre</div>
+                        <div class="dato-valor" id="res-nombre"></div>
+                        <div class="dato-label">Email</div>
+                        <div class="dato-valor" id="res-email"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-bottom: 12px;">📅 Fechas</div>
+                        <div class="dato-label">Fecha de préstamo</div>
+                        <div class="dato-valor" id="res-fecha-prestamo"></div>
+                        <div class="dato-label">Fecha de devolución</div>
+                        <div class="dato-valor" id="res-fecha-devolucion"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-bottom: 12px;">📖 Préstamo</div>
+                        <div class="dato-label">ID</div>
+                        <div class="dato-valor" id="res-id"></div>
+                        <div class="dato-label">Tipo</div>
+                        <div class="dato-valor" id="res-tipo"></div>
+                    </div>
+                </div>
+
+                <!-- Alerta de confirmación -->
+                <div class="alerta-eliminar">
+                    <div style="font-size: 14px; font-weight: bold; color: #a32d2d; margin-bottom: 8px;">
+                        ⚠️ ¿Estás seguro que deseas eliminar este préstamo?
+                    </div>
+                    <div style="font-size: 13px; color: #6c757d; margin-bottom: 16px;">
+                        Esta acción no se puede deshacer.
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button id="btn-eliminar" class="btn-eliminar btn">🗑️ Sí, eliminar</button>
+                        <a href="index.html" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </div>
+
+            </div>
+            <div id="mensaje-eliminar" class="alert mt-3 d-none"></div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="index.html" class="btn btn-secondary">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        Aplicación desarrollada para el curso de Redes e Infraestructura 2026
+    </div>
+
+    <script>
+        var idActual = null;
+
+        function buscarPrestamo() {
+            var id = document.getElementById('buscar-id').value;
+            var mensajeBuscar = document.getElementById('mensaje-buscar');
+
+            if (!id) {
+                mensajeBuscar.classList.remove('d-none', 'alert-success');
+                mensajeBuscar.classList.add('alert-danger');
+                mensajeBuscar.textContent = 'Por favor ingresa un ID';
+                return;
+            }
+
+            fetch('' + API_PRESTAMOS + '/prestamos/' + id)
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        mensajeBuscar.classList.remove('d-none', 'alert-success');
+                        mensajeBuscar.classList.add('alert-danger');
+                        mensajeBuscar.textContent = 'Préstamo no encontrado';
+                        document.getElementById('resultado').classList.add('d-none');
+                        return;
+                    }
+
+                    idActual = data.id;
+                    mensajeBuscar.classList.add('d-none');
+
+                    document.getElementById('res-titulo').textContent = data.titulo_libro;
+                    document.getElementById('res-codigo').textContent = 'Código: ' + data.codigo_libro;
+                    document.getElementById('res-usuario').textContent = data.usuario;
+                    document.getElementById('res-nombre').textContent = data.nombre_usuario;
+                    document.getElementById('res-email').textContent = data.email_usuario;
+                    document.getElementById('res-fecha-prestamo').textContent = data.fecha_prestamo.split('T')[0];
+                    document.getElementById('res-fecha-devolucion').textContent = data.fecha_devolucion.split('T')[0];
+                    document.getElementById('res-id').textContent = '#' + data.id;
+                    document.getElementById('res-tipo').innerHTML = '<span class="badge-tipo">' + data.tipo_prestamo + '</span>';
+
+                    var badgeEstado = '';
+                    if (data.estado === 'activo') badgeEstado = '<span class="badge-activo">Activo</span>';
+                    if (data.estado === 'vencido') badgeEstado = '<span class="badge-vencido">Vencido</span>';
+                    if (data.estado === 'devuelto') badgeEstado = '<span class="badge-devuelto">Devuelto</span>';
+                    document.getElementById('res-estado').innerHTML = badgeEstado;
+
+                    document.getElementById('resultado').classList.remove('d-none');
+                    document.getElementById('mensaje-eliminar').classList.add('d-none');
+                })
+                .catch(function(error) {
+                    mensajeBuscar.classList.remove('d-none', 'alert-success');
+                    mensajeBuscar.classList.add('alert-danger');
+                    mensajeBuscar.textContent = 'Error al buscar el préstamo';
+                });
+        }
+
+        function eliminarPrestamo() {
+            if (!idActual) return;
+
+            fetch('' + API_PRESTAMOS + '/prestamos/' + idActual, {
+                method: 'DELETE'
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                var mensaje = document.getElementById('mensaje-eliminar');
+                mensaje.classList.remove('d-none', 'alert-danger');
+                mensaje.classList.add('alert-success');
+                mensaje.textContent = '✅ Préstamo eliminado con éxito';
+                document.getElementById('resultado').classList.add('d-none');
+                document.getElementById('buscar-id').value = '';
+                idActual = null;
+            })
+            .catch(function(error) {
+                var mensaje = document.getElementById('mensaje-eliminar');
+                mensaje.classList.remove('d-none', 'alert-success');
+                mensaje.classList.add('alert-danger');
+                mensaje.textContent = '❌ Error al eliminar el préstamo';
+            });
+        }
+
+        document.getElementById('btn-buscar').addEventListener('click', buscarPrestamo);
+        document.getElementById('buscar-id').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') buscarPrestamo();
+        });
+        document.getElementById('btn-eliminar').addEventListener('click', eliminarPrestamo);
+    </script>
+
+<script src="../config.js"></script>
+</body>
+</html>

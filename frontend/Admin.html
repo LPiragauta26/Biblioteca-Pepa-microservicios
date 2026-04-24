@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin - Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0d2137; font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-card { background: white; border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+        .login-card .logo { text-align: center; margin-bottom: 28px; }
+        .login-card .logo div { font-size: 52px; margin-bottom: 10px; }
+        .login-card .logo h4 { color: #0d2137; font-weight: bold; margin: 0; }
+        .login-card .logo p { color: #6c757d; font-size: 13px; margin: 4px 0 0; }
+        .form-label { font-size: 14px; font-weight: bold; color: #0d2137; }
+        .form-control:focus { border-color: #0d2137; box-shadow: 0 0 0 0.2rem rgba(13,33,55,0.15); }
+        .btn-login { background-color: #0d2137; color: #c8a96e; border: none; padding: 12px; font-weight: bold; font-size: 15px; border-radius: 8px; width: 100%; }
+        .btn-login:hover { background-color: #1a3a5c; color: #c8a96e; }
+        .volver { display: block; text-align: center; margin-top: 16px; font-size: 13px; color: #6c757d; text-decoration: none; }
+        .volver:hover { color: #0d2137; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="logo">
+        <div>🔐</div>
+        <h4>Panel Administrador</h4>
+        <p>Biblioteca — Redes e Infraestructura 2026</p>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Usuario</label>
+        <input type="text" class="form-control" id="usuario" placeholder="admin">
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="password" placeholder="••••••••">
+    </div>
+
+    <div id="msg" class="alert d-none mb-3"></div>
+
+    <button onclick="ingresar()" class="btn-login btn">⚙️ Ingresar al Panel</button>
+    <a href="index.html" class="volver">← Volver al inicio</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="config.js"></script>
+<script>
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') ingresar();
+    });
+
+    async function ingresar() {
+        const usuario  = document.getElementById('usuario').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!usuario || !password) {
+            mostrarMsg('Completa todos los campos', 'warning');
+            return;
+        }
+
+        try {
+            const res = await fetch(API_USUARIOS + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario, password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                mostrarMsg('❌ ' + data.error, 'danger');
+                document.getElementById('password').value = '';
+                return;
+            }
+
+            if (data.rol !== 'admin') {
+                mostrarMsg('❌ No tienes permisos de administrador', 'danger');
+                return;
+            }
+
+            sessionStorage.setItem('adminLogueado', 'true');
+            sessionStorage.setItem('usuario', data.usuario);
+            sessionStorage.setItem('nombre', data.nombre);
+            sessionStorage.setItem('rol', data.rol);
+
+            window.location.href = 'Panel-admin.html';
+
+        } catch (error) {
+            mostrarMsg('❌ No se pudo conectar al servidor', 'danger');
+        }
+    }
+
+    function mostrarMsg(msg, tipo) {
+        const el = document.getElementById('msg');
+        el.className = 'alert alert-' + tipo;
+        el.textContent = msg;
+        el.classList.remove('d-none');
+    }
+</script>
+</body>
+</html>

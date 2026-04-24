@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Biblioteca - Sistema de Gestión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; font-size: 20px; }
+        .nav-link { color: #89b4d8 !important; }
+        .nav-link:hover { color: #c8a96e !important; }
+
+        .hero { background-color: #0d2137; padding: 50px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .hero h1 { color: #c8a96e; font-size: 30px; }
+        .hero p { color: #89b4d8; font-size: 15px; }
+
+        /* ACCESO CARDS */
+        .acceso-card {
+            border-radius: 14px; padding: 30px 25px; text-align: center;
+            border: 2px solid #dee2e6; background: white;
+            text-decoration: none; color: #0d2137; display: block;
+            transition: all 0.25s;
+        }
+        .acceso-card:hover { transform: translateY(-6px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); color: #0d2137; }
+        .acceso-card.usuario { border-color: #3b6d11; }
+        .acceso-card.usuario:hover { border-color: #3b6d11; }
+        .acceso-card.admin { border-color: #0d2137; }
+        .acceso-card .icono { font-size: 52px; margin-bottom: 16px; }
+        .acceso-card h4 { font-weight: bold; margin-bottom: 8px; }
+        .acceso-card p { font-size: 13px; color: #6c757d; margin-bottom: 20px; line-height: 1.5; }
+        .btn-usuario { background-color: #3b6d11; color: white; border: none; padding: 10px 28px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .btn-admin { background-color: #0d2137; color: #c8a96e; border: none; padding: 10px 28px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+
+        /* STATS */
+        .stats-card { border-radius: 10px; padding: 18px 20px; text-align: center; background-color: #ffffff; border: 1px solid #dee2e6; }
+        .stats-num { font-size: 26px; font-weight: bold; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .status-ok  { background-color: #3b6d11; }
+        .status-err { background-color: #a32d2d; }
+        .status-label { font-size: 12px; color: #6c757d; }
+
+        .divider { border: none; border-top: 2px dashed #dee2e6; margin: 30px 0; }
+        .section-title { font-size: 12px; font-weight: bold; color: #6c757d; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">📚 Biblioteca</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <div style="font-size:60px;margin-bottom:15px;">📚</div>
+    <h1>Sistema de Gestión de Biblioteca</h1>
+    <p>Arquitectura basada en Microservicios — Redes e Infraestructura 2026</p>
+</div>
+
+<div class="container mt-4">
+
+    <!-- ACCESO PRINCIPAL -->
+    <p class="section-title">¿Cómo deseas ingresar?</p>
+    <div class="row mb-4 g-4">
+
+        <!-- USUARIO NORMAL -->
+        <div class="col-md-6">
+            <a href="usuario.html" class="acceso-card usuario">
+                <div class="icono">👤</div>
+                <h4>Soy usuario de la biblioteca</h4>
+                <p>Consulta los libros disponibles, inicia sesión con tus credenciales y realiza tu préstamo fácilmente.</p>
+                <button class="btn-usuario btn">📖 Entrar como usuario</button>
+            </a>
+        </div>
+
+        <!-- ADMINISTRADOR -->
+        <div class="col-md-6">
+            <a href="Admin.html" class="acceso-card admin">
+                <div class="icono">🔐</div>
+                <h4>Soy administrador</h4>
+                <p>Accede al Panel de administración para gestionar usuarios, libros y préstamos del sistema.</p>
+                <button class="btn-admin btn">⚙️ Ingresar como admin</button>
+            </a>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- STATS -->
+    <p class="section-title">Estado del sistema</p>
+    <div class="row mb-3">
+        <div class="col-md-4 mb-3">
+            <div class="stats-card">
+                <div class="stats-num" style="color:#185fa5;" id="num-usuarios">...</div>
+                <div style="font-size:13px;color:#6c757d;">Usuarios registrados</div>
+                <div class="mt-1">
+                    <span class="status-dot" id="dot-usuarios"></span>
+                    <span class="status-label" id="status-usuarios">Conectando...</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="stats-card">
+                <div class="stats-num" style="color:#854f0b;" id="num-libros">...</div>
+                <div style="font-size:13px;color:#6c757d;">Libros en inventario</div>
+                <div class="mt-1">
+                    <span class="status-dot" id="dot-libros"></span>
+                    <span class="status-label" id="status-libros">Conectando...</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="stats-card">
+                <div class="stats-num" style="color:#3b6d11;" id="num-prestamos">...</div>
+                <div style="font-size:13px;color:#6c757d;">Préstamos activos</div>
+                <div class="mt-1">
+                    <span class="status-dot" id="dot-prestamos"></span>
+                    <span class="status-label" id="status-prestamos">Conectando...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info red -->
+    <div class="card" style="border-radius:10px;border:1px solid #dee2e6;background:white;">
+        <div class="card-body">
+            <p class="section-title mb-2">ℹ️ Configuración de red</p>
+            <div class="row" style="font-size:13px;">
+                <div class="col-md-4">👤 Usuarios: <code id="url-usuarios"></code></div>
+                <div class="col-md-4">📖 Libros: <code id="url-libros"></code></div>
+                <div class="col-md-4">🔖 Préstamos: <code id="url-prestamos"></code></div>
+            </div>
+            <div class="mt-2" style="font-size:12px;color:#6c757d;">
+                Para cambiar las IPs edita el archivo <code>config.js</code>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    Aplicación desarrollada para el curso de Redes e Infraestructura 2026
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('url-usuarios').textContent  = API_USUARIOS.replace('http://','');
+    document.getElementById('url-libros').textContent    = API_LIBROS.replace('http://','');
+    document.getElementById('url-prestamos').textContent = API_PRESTAMOS.replace('http://','');
+
+    function setStatus(id, ok, valor) {
+        document.getElementById('num-' + id).textContent    = valor;
+        document.getElementById('dot-' + id).className      = 'status-dot ' + (ok ? 'status-ok' : 'status-err');
+        document.getElementById('status-' + id).textContent = ok ? 'Conectado ✓' : 'Sin conexión';
+    }
+
+    fetch(API_USUARIOS + '/usuarios')
+        .then(r => r.json())
+        .then(d => setStatus('usuarios', true, Array.isArray(d) ? d.length : '?'))
+        .catch(() => setStatus('usuarios', false, '—'));
+
+    fetch(API_LIBROS + '/libros')
+        .then(r => r.json())
+        .then(d => setStatus('libros', true, Array.isArray(d) ? d.length : '?'))
+        .catch(() => setStatus('libros', false, '—'));
+
+    fetch(API_PRESTAMOS + '/prestamos')
+        .then(r => r.json())
+        .then(d => setStatus('prestamos', true, Array.isArray(d) ? d.filter(p => p.estado === 'activo').length : '?'))
+        .catch(() => setStatus('prestamos', false, '—'));
+</script>
+</body>
+</html>

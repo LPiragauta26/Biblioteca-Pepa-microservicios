@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Biblioteca - Usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; }
+        .nav-link { color: #89b4d8 !important; }
+        .nav-link:hover { color: #c8a96e !important; }
+        .hero { background-color: #0d2137; padding: 40px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .hero h1 { color: #c8a96e; font-size: 26px; }
+        .hero p { color: #89b4d8; font-size: 14px; margin: 0; }
+        .tabs-bar { background: white; border-bottom: 2px solid #dee2e6; padding: 0 20px; display: flex; }
+        .tab-btn { padding: 14px 20px; border: none; background: none; font-size: 14px; font-weight: bold; color: #6c757d; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .tab-btn.active { color: #0d2137; border-bottom-color: #0d2137; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .filtro-bar { background: white; border-radius: 10px; border: 1px solid #dee2e6; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .card-libro { background: white; border-radius: 10px; border: 1px solid #dee2e6; padding: 18px; margin-bottom: 12px; border-left: 4px solid #0d2137; }
+        .card-libro.agotado { border-left-color: #a32d2d; opacity: 0.75; }
+        .card-libro .titulo { font-size: 15px; font-weight: bold; color: #0d2137; }
+        .card-libro .subtitulo { font-size: 13px; color: #6c757d; margin-bottom: 8px; }
+        .badge-disponible { background-color: #3b6d11; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-agotado { background-color: #a32d2d; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-genero { background-color: #0d2137; color: #c8a96e; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .session-card { background: white; border-radius: 12px; border: 1px solid #dee2e6; max-width: 480px; margin: 0 auto; }
+        .session-tabs { display: flex; border-bottom: 2px solid #dee2e6; }
+        .session-tab { flex: 1; padding: 12px; text-align: center; border: none; background: none; font-weight: bold; font-size: 14px; color: #6c757d; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+        .session-tab.active { color: #0d2137; border-bottom-color: #0d2137; }
+        .session-content { display: none; padding: 24px; }
+        .session-content.active { display: block; }
+        .user-banner { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .user-banner .nombre { font-weight: bold; color: #1b5e20; font-size: 15px; }
+        .user-banner .info { font-size: 13px; color: #388e3c; }
+        .form-label { font-size: 14px; font-weight: bold; color: #0d2137; }
+        .info-box { background: #f0f4f8; border-radius: 8px; padding: 10px 14px; font-size: 13px; border-left: 4px solid #3b6d11; margin-top: 6px; display: none; }
+        .card-prestamo { background: white; border-radius: 10px; border: 1px solid #dee2e6; padding: 18px; margin-bottom: 12px; border-left: 4px solid #185fa5; }
+        .card-prestamo.vencido  { border-left-color: #a32d2d; }
+        .card-prestamo.devuelto { border-left-color: #3b6d11; }
+        .card-prestamo.pendiente { border-left-color: #854f0b; }
+        .card-prestamo.anulado  { border-left-color: #6c757d; }
+        .badge-activo   { background-color: #185fa5; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-vencido  { background-color: #a32d2d; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-devuelto { background-color: #3b6d11; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-pendiente { background-color: #854f0b; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-anulado  { background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-tipo { background-color: #0d2137; color: #c8a96e; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .multa-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 8px; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">📚 Biblioteca</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <div style="font-size:50px;margin-bottom:10px;">📚</div>
+    <h1>Bienvenido a la Biblioteca</h1>
+    <p>Consulta libros disponibles y realiza tu préstamo</p>
+</div>
+
+<div class="tabs-bar">
+    <button class="tab-btn active" onclick="cambiarTab('libros', this)">📖 Libros disponibles</button>
+    <button class="tab-btn" onclick="cambiarTab('prestamo', this)">➕ Solicitar préstamo</button>
+    <button class="tab-btn" onclick="cambiarTab('misprestamos', this)">🔖 Mis préstamos</button>
+</div>
+
+<div class="container mt-4">
+    <div id="alerta-global"></div>
+
+    <!-- TAB 1: LIBROS -->
+    <div id="tab-libros" class="tab-content active">
+        <div class="filtro-bar">
+            <input type="text" id="filtro-texto" class="form-control" style="max-width:300px;" placeholder="🔍 Buscar por título o autor...">
+            <select id="filtro-estado" class="form-select" style="max-width:180px;">
+                <option value="">Todos</option>
+                <option value="disponible">Solo disponibles</option>
+                <option value="agotado">Solo agotados</option>
+            </select>
+            <button class="btn btn-sm" style="background:#0d2137;color:#c8a96e;" onclick="cargarLibros()">🔄 Actualizar</button>
+            <span id="total-libros" style="font-size:13px;color:#6c757d;margin-left:auto;"></span>
+        </div>
+        <div id="lista-libros"><div class="text-center text-muted py-4">Cargando libros...</div></div>
+    </div>
+
+    <!-- TAB 2: SOLICITAR PRÉSTAMO -->
+    <div id="tab-prestamo" class="tab-content">
+        <div id="bloque-sesion">
+            <div class="session-card">
+                <div class="session-tabs">
+                    <button class="session-tab active" onclick="cambiarSesionTab('login', this)">🔐 Iniciar sesión</button>
+                    <button class="session-tab" onclick="cambiarSesionTab('registro', this)">📝 Crear cuenta</button>
+                </div>
+                <div id="st-login" class="session-content active">
+                    <p style="font-size:13px;color:#6c757d;margin-bottom:18px;">Ingresa tus credenciales para solicitar un préstamo.</p>
+                    <div class="mb-3"><label class="form-label">Usuario</label><input type="text" class="form-control" id="login-usuario" placeholder="Ej: jgarcia"></div>
+                    <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" id="login-password" placeholder="••••••••"></div>
+                    <div id="login-msg" class="alert d-none"></div>
+                    <button onclick="iniciarSesion()" class="btn w-100" style="background:#0d2137;color:#c8a96e;font-weight:bold;padding:11px;">🔐 Iniciar sesión</button>
+                </div>
+                <div id="st-registro" class="session-content">
+                    <p style="font-size:13px;color:#6c757d;margin-bottom:18px;">¿No tienes cuenta? Regístrate aquí.</p>
+                    <div class="mb-3"><label class="form-label">Nombre completo</label><input type="text" class="form-control" id="reg-nombre" placeholder="Ej: María García"></div>
+                    <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="reg-email" placeholder="correo@ejemplo.com"></div>
+                    <div class="mb-3"><label class="form-label">Usuario</label><input type="text" class="form-control" id="reg-usuario" placeholder="Ej: mgarcia"></div>
+                    <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" id="reg-password" placeholder="••••••••"></div>
+                    <div id="reg-msg" class="alert d-none"></div>
+                    <button onclick="crearCuenta()" class="btn w-100" style="background:#3b6d11;color:white;font-weight:bold;padding:11px;">📝 Crear cuenta</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="bloque-prestamo" style="display:none;max-width:650px;margin:0 auto;">
+            <div class="user-banner">
+                <div>
+                    <div class="nombre">👤 <span id="sesion-nombre"></span></div>
+                    <div class="info">Usuario: <span id="sesion-usuario"></span> — <span id="sesion-email"></span></div>
+                </div>
+                <button onclick="cerrarSesion()" class="btn btn-sm btn-outline-danger">Cerrar sesión</button>
+            </div>
+            <div class="card" style="border-radius:12px;border:1px solid #dee2e6;">
+                <div class="card-body p-4">
+                    <h5 style="color:#0d2137;margin-bottom:6px;">➕ Solicitar Préstamo</h5>
+                    <p style="font-size:13px;color:#6c757d;margin-bottom:20px;">Tu solicitud quedará pendiente hasta que el administrador la apruebe.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Código del libro</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="p-codigo" placeholder="Ej: LIB001">
+                            <button class="btn btn-outline-secondary" onclick="verificarLibro()">Verificar</button>
+                        </div>
+                        <div class="info-box" id="info-libro">📖 <strong id="p-titulo-libro"></strong> — Disponibles: <span id="p-cantidad-libro"></span></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Tipo de préstamo</label>
+                        <select class="form-select" id="p-tipo">
+                            <option value="">-- Seleccionar --</option>
+                            <option value="domiciliario">Domiciliario (1 min demo)</option>
+                            <option value="sala">Sala (1.5 min demo)</option>
+                            <option value="convenio">Convenio (2 min demo)</option>
+                        </select>
+                    </div>
+                    <button onclick="realizarPrestamo()" class="btn w-100" style="background:#0d2137;color:#c8a96e;font-weight:bold;padding:12px;">📋 Enviar Solicitud</button>
+                    <div id="msg-prestamo" class="alert mt-3 d-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: MIS PRÉSTAMOS -->
+    <div id="tab-misprestamos" class="tab-content">
+        <div style="max-width:700px;margin:0 auto;">
+
+            <!-- Si no hay sesión -->
+            <div id="bloque-login-prestamos">
+                <div class="session-card">
+                    <div class="session-content active">
+                        <p style="font-size:13px;color:#6c757d;margin-bottom:18px;">Inicia sesión para ver tus préstamos.</p>
+                        <div class="mb-3"><label class="form-label">Usuario</label><input type="text" class="form-control" id="consulta-usuario" placeholder="Ej: jgarcia"></div>
+                        <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" id="consulta-password" placeholder="••••••••"></div>
+                        <div id="msg-consulta" class="alert d-none"></div>
+                        <button onclick="loginYcargar()" class="btn w-100" style="background:#0d2137;color:#c8a96e;font-weight:bold;padding:11px;">🔍 Ver mis préstamos</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de préstamos del usuario logueado -->
+            <div id="bloque-mis-prestamos" style="display:none;">
+                <div class="user-banner mb-3">
+                    <div>
+                        <div class="nombre">👤 <span id="mp-nombre"></span></div>
+                        <div class="info">Usuario: <span id="mp-usuario"></span></div>
+                    </div>
+                    <button onclick="cerrarSesionPrestamos()" class="btn btn-sm btn-outline-danger">Cerrar sesión</button>
+                </div>
+                <button onclick="cargarMisPrestamos()" class="btn btn-sm mb-3" style="background:#0d2137;color:#c8a96e;">🔄 Actualizar</button>
+                <div id="lista-prestamos"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let usuarioSesion = null;
+    let todosLosLibros = [];
+
+    // ============================================================
+    //  TABS
+    // ============================================================
+    function cambiarTab(tab, btn) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        btn.classList.add('active');
+        if (tab === 'misprestamos' && usuarioSesion) cargarMisPrestamos();
+    }
+
+    function cambiarSesionTab(tab, btn) {
+        document.querySelectorAll('.session-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.session-tab').forEach(b => b.classList.remove('active'));
+        document.getElementById('st-' + tab).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // ============================================================
+    //  LOGIN
+    // ============================================================
+    async function iniciarSesion() {
+        const usuario  = document.getElementById('login-usuario').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        if (!usuario || !password) { showMsg('login-msg', 'Completa todos los campos', 'warning'); return; }
+
+        try {
+            const res  = await fetch(API_USUARIOS + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showMsg('login-msg', '❌ ' + data.error, 'danger'); return; }
+            if (data.rol === 'admin') { showMsg('login-msg', '❌ Los administradores usan el Panel de admin', 'danger'); return; }
+            establecerSesion(data);
+        } catch { showMsg('login-msg', '❌ No se pudo conectar al servidor', 'danger'); }
+    }
+
+    async function loginYcargar() {
+        const usuario  = document.getElementById('consulta-usuario').value.trim();
+        const password = document.getElementById('consulta-password').value.trim();
+        if (!usuario || !password) { showMsg('msg-consulta', 'Completa todos los campos', 'warning'); return; }
+
+        try {
+            const res  = await fetch(API_USUARIOS + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showMsg('msg-consulta', '❌ ' + data.error, 'danger'); return; }
+
+            usuarioSesion = data;
+            document.getElementById('mp-nombre').textContent  = data.nombre;
+            document.getElementById('mp-usuario').textContent = data.usuario;
+            document.getElementById('bloque-login-prestamos').style.display = 'none';
+            document.getElementById('bloque-mis-prestamos').style.display   = 'block';
+            cargarMisPrestamos();
+        } catch { showMsg('msg-consulta', '❌ No se pudo conectar al servidor', 'danger'); }
+    }
+
+    function establecerSesion(data) {
+        usuarioSesion = data;
+        document.getElementById('sesion-nombre').textContent  = data.nombre;
+        document.getElementById('sesion-usuario').textContent = data.usuario;
+        document.getElementById('sesion-email').textContent   = data.email;
+        document.getElementById('bloque-sesion').style.display   = 'none';
+        document.getElementById('bloque-prestamo').style.display = 'block';
+    }
+
+    function cerrarSesion() {
+        usuarioSesion = null;
+        document.getElementById('bloque-sesion').style.display   = 'block';
+        document.getElementById('bloque-prestamo').style.display = 'none';
+        document.getElementById('login-usuario').value  = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('info-libro').style.display = 'none';
+        document.getElementById('p-codigo').value = '';
+        document.getElementById('p-tipo').value   = '';
+        document.getElementById('msg-prestamo').classList.add('d-none');
+    }
+
+    function cerrarSesionPrestamos() {
+        usuarioSesion = null;
+        document.getElementById('bloque-login-prestamos').style.display = 'block';
+        document.getElementById('bloque-mis-prestamos').style.display   = 'none';
+        document.getElementById('consulta-usuario').value  = '';
+        document.getElementById('consulta-password').value = '';
+        document.getElementById('lista-prestamos').innerHTML = '';
+    }
+
+    // ============================================================
+    //  REGISTRO
+    // ============================================================
+    async function crearCuenta() {
+        const nombre   = document.getElementById('reg-nombre').value.trim();
+        const email    = document.getElementById('reg-email').value.trim();
+        const usuario  = document.getElementById('reg-usuario').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+        if (!nombre || !email || !usuario || !password) { showMsg('reg-msg', 'Completa todos los campos', 'warning'); return; }
+
+        try {
+            const res  = await fetch(API_USUARIOS + '/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, email, usuario, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMsg('reg-msg', '✅ Cuenta creada. Ahora inicia sesión.', 'success');
+                ['reg-nombre','reg-email','reg-usuario','reg-password'].forEach(id => document.getElementById(id).value = '');
+                setTimeout(() => {
+                    document.querySelectorAll('.session-tab')[0].click();
+                    document.getElementById('login-usuario').value = usuario;
+                }, 1500);
+            } else {
+                showMsg('reg-msg', '❌ ' + (data.error || 'Error al crear la cuenta'), 'danger');
+            }
+        } catch { showMsg('reg-msg', '❌ Error de conexión', 'danger'); }
+    }
+
+    // ============================================================
+    //  PRÉSTAMOS
+    // ============================================================
+    function verificarLibro() {
+        const c = document.getElementById('p-codigo').value.trim();
+        if (!c) return;
+        fetch(API_LIBROS + '/libros/' + c)
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(d => {
+                document.getElementById('p-titulo-libro').textContent   = d.titulo;
+                document.getElementById('p-cantidad-libro').textContent = d.cantidad_disponible ?? 0;
+                document.getElementById('info-libro').style.display = 'block';
+                if ((d.cantidad_disponible ?? 0) <= 0) showGlobal('⚠️ Este libro no tiene disponibilidad', 'warning');
+            })
+            .catch(() => { document.getElementById('info-libro').style.display = 'none'; showGlobal('❌ Libro no encontrado', 'danger'); });
+    }
+
+    async function realizarPrestamo() {
+        if (!usuarioSesion) return;
+        const codigo_libro  = document.getElementById('p-codigo').value.trim();
+        const tipo_prestamo = document.getElementById('p-tipo').value;
+        if (!codigo_libro || !tipo_prestamo) { showMsg('msg-prestamo', '⚠️ Completa todos los campos', 'warning'); return; }
+
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioSesion.usuario, codigo_libro, tipo_prestamo })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showMsg('msg-prestamo', '✅ ' + data.mensaje, 'success');
+                document.getElementById('p-codigo').value = '';
+                document.getElementById('p-tipo').value   = '';
+                document.getElementById('info-libro').style.display = 'none';
+                cargarLibros();
+            } else {
+                showMsg('msg-prestamo', '❌ ' + (data.error || 'Error al registrar'), 'danger');
+            }
+        } catch { showMsg('msg-prestamo', '❌ Error de conexión', 'danger'); }
+    }
+
+    async function cargarMisPrestamos() {
+        if (!usuarioSesion) return;
+        document.getElementById('lista-prestamos').innerHTML = '<div class="text-center text-muted py-3">Cargando...</div>';
+
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos/usuario/' + usuarioSesion.usuario);
+            const data = await res.json();
+
+            if (!res.ok || !Array.isArray(data) || data.length === 0) {
+                document.getElementById('lista-prestamos').innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <div style="font-size:40px;">📭</div>
+                        <p>No tienes préstamos registrados.</p>
+                    </div>`;
+                return;
+            }
+
+            const pendientes = data.filter(p => p.estado === 'pendiente').length;
+            const activos    = data.filter(p => p.estado === 'activo').length;
+            const vencidos   = data.filter(p => p.estado === 'vencido').length;
+            const devueltos  = data.filter(p => p.estado === 'devuelto').length;
+
+            let html = `
+            <div class="row mb-3 g-2">
+                <div class="col-3"><div class="text-center p-2 bg-white rounded border"><div style="font-size:18px;font-weight:bold;color:#854f0b;">${pendientes}</div><div style="font-size:11px;color:#6c757d;">Pendientes</div></div></div>
+                <div class="col-3"><div class="text-center p-2 bg-white rounded border"><div style="font-size:18px;font-weight:bold;color:#185fa5;">${activos}</div><div style="font-size:11px;color:#6c757d;">Activos</div></div></div>
+                <div class="col-3"><div class="text-center p-2 bg-white rounded border"><div style="font-size:18px;font-weight:bold;color:#a32d2d;">${vencidos}</div><div style="font-size:11px;color:#6c757d;">Vencidos</div></div></div>
+                <div class="col-3"><div class="text-center p-2 bg-white rounded border"><div style="font-size:18px;font-weight:bold;color:#3b6d11;">${devueltos}</div><div style="font-size:11px;color:#6c757d;">Devueltos</div></div></div>
+            </div>`;
+
+            data.forEach(p => {
+                const badgeClass = { pendiente:'badge-pendiente', activo:'badge-activo', vencido:'badge-vencido', devuelto:'badge-devuelto', anulado:'badge-anulado' }[p.estado] || 'badge-activo';
+                const cardClass  = { vencido:'vencido', devuelto:'devuelto', pendiente:'pendiente', anulado:'anulado' }[p.estado] || '';
+
+                const fechaDevol = new Date(p.fecha_devolucion);
+                const ahora      = new Date();
+                const diffSeg    = Math.floor((ahora - fechaDevol) / 1000);
+
+                let multaHtml = '';
+                if (p.estado === 'vencido' && p.multa_valor > 0) {
+                    multaHtml = `<div class="multa-box">⚠️ <strong>Multa acumulada:</strong> $${Number(p.multa_valor).toLocaleString()} — ${diffSeg} segundos de retraso</div>`;
+                }
+
+                let btnDevolucion = '';
+                if (['activo','vencido'].includes(p.estado) && !p.solicitud_devolucion) {
+                    btnDevolucion = `<button onclick="solicitarDevolucion(${p.id})" class="btn btn-sm btn-outline-primary mt-2">📤 Solicitar devolución</button>`;
+                } else if (p.solicitud_devolucion) {
+                    btnDevolucion = `<span style="font-size:12px;color:#3b6d11;margin-top:8px;display:block;">✅ Devolución solicitada — esperando al administrador</span>`;
+                }
+
+                html += `
+                <div class="card-prestamo ${cardClass}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <div style="font-size:15px;font-weight:bold;color:#0d2137;">📗 ${p.titulo_libro}</div>
+                            <div style="font-size:13px;color:#6c757d;">Código: ${p.codigo_libro} &nbsp;|&nbsp; <span class="badge-tipo">${p.tipo_prestamo}</span></div>
+                        </div>
+                        <span class="${badgeClass}">${p.estado}</span>
+                    </div>
+                    <div class="row" style="font-size:13px;">
+                        <div class="col-md-4"><strong>ID:</strong> #${p.id}</div>
+                        <div class="col-md-4"><strong>Préstamo:</strong> ${formatFecha(p.fecha_prestamo)}</div>
+                        <div class="col-md-4"><strong>Devolución:</strong> ${formatFecha(p.fecha_devolucion)}</div>
+                    </div>
+                    ${multaHtml}
+                    ${btnDevolucion}
+                </div>`;
+            });
+
+            document.getElementById('lista-prestamos').innerHTML = html;
+        } catch {
+            document.getElementById('lista-prestamos').innerHTML = '<div class="alert alert-danger">❌ Error al cargar préstamos</div>';
+        }
+    }
+
+    async function solicitarDevolucion(id) {
+        if (!confirm('¿Confirmas que vas a devolver este libro?')) return;
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos/' + id + '/solicitar-devolucion', { method: 'PUT' });
+            const data = await res.json();
+            if (res.ok) { showGlobal('✅ ' + data.mensaje, 'success'); cargarMisPrestamos(); }
+            else showGlobal('❌ ' + (data.error || 'Error'), 'danger');
+        } catch { showGlobal('❌ Error de conexión', 'danger'); }
+    }
+
+    // ============================================================
+    //  LIBROS
+    // ============================================================
+    function cargarLibros() {
+        document.getElementById('lista-libros').innerHTML = '<div class="text-center text-muted py-4">Cargando libros...</div>';
+        fetch(API_LIBROS + '/libros')
+            .then(r => r.json())
+            .then(data => { todosLosLibros = data; filtrarLibros(); })
+            .catch(() => { document.getElementById('lista-libros').innerHTML = '<div class="alert alert-danger">❌ No se pudo conectar con el microservicio de libros.</div>'; });
+    }
+
+    function filtrarLibros() {
+        const texto  = document.getElementById('filtro-texto').value.toLowerCase();
+        const estado = document.getElementById('filtro-estado').value;
+        let libros   = todosLosLibros;
+        if (texto)  libros = libros.filter(l => (l.titulo||'').toLowerCase().includes(texto) || (l.autor||'').toLowerCase().includes(texto));
+        if (estado === 'disponible') libros = libros.filter(l => (l.cantidad_disponible ?? 0) > 0);
+        if (estado === 'agotado')    libros = libros.filter(l => (l.cantidad_disponible ?? 0) === 0);
+        document.getElementById('total-libros').textContent = libros.length + ' libros encontrados';
+        const lista = document.getElementById('lista-libros');
+        if (!libros.length) { lista.innerHTML = '<div class="text-center text-muted py-4"><div style="font-size:40px;">📭</div><p>No se encontraron libros.</p></div>'; return; }
+        lista.innerHTML = libros.map(l => {
+            const cantidad   = l.cantidad_disponible ?? 0;
+            const disponible = cantidad > 0;
+            return `<div class="card-libro ${disponible?'':'agotado'}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex:1;">
+                        <div class="titulo">📗 ${l.titulo}</div>
+                        <div class="subtitulo">Código: ${l.codigo} &nbsp;|&nbsp; <span class="badge-genero">${l.genero||'—'}</span></div>
+                        <div style="font-size:13px;color:#444;">✍️ <strong>Autor:</strong> ${l.autor||'—'} &nbsp;&nbsp; 📦 <strong>Disponibles:</strong> ${cantidad}</div>
+                    </div>
+                    <div class="ms-3">${disponible?'<span class="badge-disponible">Disponible</span>':'<span class="badge-agotado">Agotado</span>'}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ============================================================
+    //  UTILIDADES
+    // ============================================================
+    function formatFecha(f) {
+        if (!f) return '—';
+        const d = new Date(f);
+        return d.toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' });
+    }
+
+    function showGlobal(msg, tipo) {
+        document.getElementById('alerta-global').innerHTML = `<div class="alert alert-${tipo} alert-dismissible">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    }
+
+    function showMsg(id, msg, tipo) {
+        const el = document.getElementById(id);
+        el.className = 'alert alert-' + tipo;
+        el.textContent = msg;
+        el.classList.remove('d-none');
+    }
+
+    document.getElementById('filtro-texto').addEventListener('input', filtrarLibros);
+    document.getElementById('filtro-estado').addEventListener('change', filtrarLibros);
+
+    cargarLibros();
+</script>
+</body>
+</html>

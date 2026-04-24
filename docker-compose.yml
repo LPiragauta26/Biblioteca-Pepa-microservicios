@@ -1,35 +1,96 @@
 version: '3.8'
 
+networks:
+  biblioteca-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+
 services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: biblioteca-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Laura
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - /vagrant/microservicios/microservicios.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - biblioteca-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pLaura"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   usuarios:
     build: ./usuarios
     environment:
-      DB_HOST: 192.168.100.2
+      DB_HOST: mysql
       DB_PASSWORD: Laura
       DB_NAME: usuarios_db
-    ports:
+    expose:
       - "3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - biblioteca-net
     restart: always
 
   libros:
     build: ./libros
     environment:
-      DB_HOST: 192.168.100.2
+      DB_HOST: mysql
       DB_PASSWORD: Laura
       DB_NAME: libros_db
-    ports:
+    expose:
       - "3002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - biblioteca-net
     restart: always
 
   prestamos:
     build: ./prestamos
     environment:
-      DB_HOST: 192.168.100.2
+      DB_HOST: mysql
       DB_PASSWORD: Laura
       DB_NAME: prestamos_db
-    ports:
+    expose:
       - "3003"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      usuarios:
+        condition: service_started
+      libros:
+        condition: service_started
+    networks:
+      - biblioteca-net
+    restart: always
+
+  admin:
+    build: ./admin
+    environment:
+      DB_HOST: mysql
+      DB_PASSWORD: Laura
+      DB_NAME: usuarios_db
+    expose:
+      - "3004"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - biblioteca-net
     restart: always
 
   haproxy:
@@ -38,12 +99,23 @@ services:
       - "3001:3001"
       - "3002:3002"
       - "3003:3003"
+      - "3004:3004"
       - "8404:8404"
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - /vagrant/microservicios/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - usuarios
       - libros
       - prestamos
+      - admin
+    networks:
+      - biblioteca-net
     restart: always
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    networks:
+      - biblioteca-net
+    restart: always

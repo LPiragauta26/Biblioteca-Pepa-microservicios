@@ -1,0 +1,140 @@
+version: '3.8'
+
+networks:
+  biblioteca-net:
+    driver: overlay
+
+volumes:
+  mysql_data:
+
+services:
+
+  # =========================
+  # Base de Datos MySQL
+  # =========================
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: Laura
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - /vagrant/microservicios/microservicios.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pLaura"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================
+  # Microservicio Usuarios
+  # =========================
+  usuarios:
+    image: lpiragauta/biblioteca-usuarios:latest
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: Laura
+      DB_NAME: usuarios_db
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+  # =========================
+  # Microservicio Libros
+  # =========================
+  libros:
+    image: lpiragauta/biblioteca-libros:latest
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: Laura
+      DB_NAME: libros_db
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+  # =========================
+  # Microservicio Préstamos
+  # =========================
+  prestamos:
+    image: lpiragauta/biblioteca-prestamos:latest
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: Laura
+      DB_NAME: prestamos_db
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+  # =========================
+  # Microservicio Admin
+  # =========================
+  admin:
+    image: lpiragauta/biblioteca-admin:latest
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: Laura
+      DB_NAME: admin_db
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  # =========================
+  # Balanceador HAProxy
+  # =========================
+  haproxy:
+    image: haproxy:2.8
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
+      - "3004:3004"
+      - "8404:8404"
+    volumes:
+      - /vagrant/microservicios/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  # =========================
+  # Frontend
+  # =========================
+  frontend:
+    image: lpiragauta/biblioteca-frontend:latest
+    ports:
+      - "8080:80"
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Editar Préstamo - Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../config.js"></script>
+    <style>
+        body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+        .navbar { background-color: #0d2137; }
+        .navbar-brand { color: #c8a96e !important; font-weight: bold; }
+        .nav-link { color: #89b4d8 !important; }
+        .nav-link:hover { color: #c8a96e !important; }
+        .header-section { background-color: #0d2137; padding: 30px 20px; text-align: center; border-bottom: 2px solid #1a3a5c; }
+        .header-section h2 { color: #c8a96e; font-size: 24px; }
+        .header-section p { color: #89b4d8; font-size: 13px; margin: 0; }
+        .card-form { background: white; border-radius: 12px; border: 1px solid #dee2e6; padding: 30px; }
+        .section-label { font-size: 12px; font-weight: bold; color: #6c757d; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #854f0b; }
+        .form-label { font-size: 14px; font-weight: bold; color: #0d2137; }
+        .btn-buscar { background-color: #0d2137; color: #c8a96e; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+        .btn-accion { padding: 8px 16px; border-radius: 8px; font-weight: bold; border: none; font-size: 13px; }
+        .info-prestamo { background: #f0f4f8; border-radius: 8px; padding: 14px; font-size: 13px; margin-bottom: 16px; }
+        .badge-activo { background:#185fa5; color:white; padding:3px 10px; border-radius:20px; font-size:12px; }
+        .badge-vencido { background:#a32d2d; color:white; padding:3px 10px; border-radius:20px; font-size:12px; }
+        .badge-pendiente { background:#854f0b; color:white; padding:3px 10px; border-radius:20px; font-size:12px; }
+        .badge-devuelto { background:#3b6d11; color:white; padding:3px 10px; border-radius:20px; font-size:12px; }
+        .badge-anulado { background:#6c757d; color:white; padding:3px 10px; border-radius:20px; font-size:12px; }
+        .multa-box { background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:12px; }
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: #6c757d; border-top: 1px solid #dee2e6; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="../index.html">📚 Biblioteca</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="ver_prestamos.html">Ver Préstamos</a></li>
+                <li class="nav-item"><a class="nav-link" href="insertar_prestamos.html">Insertar</a></li>
+                <li class="nav-item"><a class="nav-link" href="consultar_prestamos.html">Consultar</a></li>
+                <li class="nav-item"><a class="nav-link" href="borrar_prestamos.html">Eliminar</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="header-section">
+    <div style="font-size:40px;margin-bottom:10px;">✏️</div>
+    <h2>Gestionar Préstamo</h2>
+    <p>Busca el préstamo por ID y aplica la acción correspondiente</p>
+</div>
+
+<div class="container mt-4" style="max-width:700px;">
+
+    <div class="card-form mb-4">
+        <div class="section-label">🔎 Buscar Préstamo</div>
+        <div class="d-flex gap-2">
+            <input type="number" class="form-control" id="buscar-id" placeholder="Ingresa el ID del préstamo">
+            <button onclick="buscarPrestamo()" class="btn-buscar btn">Buscar</button>
+        </div>
+        <div id="mensaje-buscar" class="alert mt-3 d-none"></div>
+    </div>
+
+    <div class="card-form d-none" id="form-editar">
+
+        <div class="section-label">📋 Datos del préstamo</div>
+        <div class="info-prestamo" id="info-prestamo"></div>
+
+        <div class="section-label">⚙️ Acciones disponibles</div>
+        <div id="acciones"></div>
+
+        <div id="mensaje-accion" class="alert mt-3 d-none"></div>
+    </div>
+</div>
+
+<div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let prestamoActual = null;
+
+    function buscarPrestamo() {
+        const id = document.getElementById('buscar-id').value;
+        if (!id) { showMsg('mensaje-buscar', 'Ingresa un ID', 'warning'); return; }
+
+        fetch(API_PRESTAMOS + '/prestamos/' + id)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { showMsg('mensaje-buscar', '❌ Préstamo no encontrado', 'danger'); return; }
+                prestamoActual = data;
+                document.getElementById('mensaje-buscar').classList.add('d-none');
+                document.getElementById('form-editar').classList.remove('d-none');
+                renderPrestamo(data);
+                renderAcciones(data);
+            })
+            .catch(() => showMsg('mensaje-buscar', '❌ Error de conexión', 'danger'));
+    }
+
+    function renderPrestamo(p) {
+        const badges = { pendiente:'badge-pendiente', activo:'badge-activo', vencido:'badge-vencido', devuelto:'badge-devuelto', anulado:'badge-anulado' };
+        const multaHtml = p.multa_valor > 0 ? `<div class="multa-box mt-2">⚠️ <strong>Multa:</strong> $${Number(p.multa_valor).toLocaleString()} — Pagada: ${p.multa_pagada ? '✅ Sí' : '❌ No'}</div>` : '';
+        document.getElementById('info-prestamo').innerHTML = `
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <div style="font-size:15px;font-weight:bold;">📗 ${p.titulo_libro}</div>
+                    <div style="font-size:13px;color:#6c757d;">Código: ${p.codigo_libro} | Tipo: ${p.tipo_prestamo}</div>
+                </div>
+                <span class="${badges[p.estado]||'badge-activo'}">${p.estado}</span>
+            </div>
+            <div class="row" style="font-size:13px;">
+                <div class="col-md-4"><strong>ID:</strong> #${p.id}</div>
+                <div class="col-md-4"><strong>Usuario:</strong> ${p.usuario}</div>
+                <div class="col-md-4"><strong>Nombre:</strong> ${p.nombre_usuario}</div>
+                <div class="col-md-6 mt-1"><strong>Préstamo:</strong> ${formatFecha(p.fecha_prestamo)}</div>
+                <div class="col-md-6 mt-1"><strong>Devolución:</strong> ${formatFecha(p.fecha_devolucion)}</div>
+            </div>
+            ${multaHtml}`;
+    }
+
+    function renderAcciones(p) {
+        let html = '<div class="d-flex gap-2 flex-wrap">';
+        if (p.estado === 'pendiente') {
+            html += `<button onclick="accion('aprobar')" class="btn-accion btn btn-success">✅ Aprobar</button>`;
+            html += `<button onclick="accion('rechazar')" class="btn-accion btn btn-danger">❌ Rechazar</button>`;
+        }
+        if (['activo','vencido'].includes(p.estado)) {
+            html += `<button onclick="accion('confirmar-devolucion')" class="btn-accion btn btn-success">📥 Confirmar devolución</button>`;
+            html += `<button onclick="accion('anular')" class="btn-accion btn btn-outline-danger">🚫 Anular</button>`;
+        }
+        if (['activo','vencido'].includes(p.estado)) {
+            html += `<button onclick="accion('renovar')" class="btn-accion btn btn-warning">🔄 Renovar</button>`;
+        }
+        if (['devuelto','anulado'].includes(p.estado)) {
+            html += `<div class="text-muted" style="font-size:13px;">Este préstamo ya está cerrado — no hay acciones disponibles.</div>`;
+        }
+        html += '</div>';
+        document.getElementById('acciones').innerHTML = html;
+    }
+
+    async function accion(tipo) {
+        const mensajes = {
+            'aprobar': '¿Aprobar este préstamo? El stock se descontará.',
+            'rechazar': '¿Rechazar esta solicitud?',
+            'confirmar-devolucion': '¿Confirmas que recibiste el libro físicamente?',
+            'anular': '¿Anular este préstamo? El stock se restaurará.',
+            'renovar': '¿Renovar este préstamo? Se extenderá el tiempo.'
+        };
+        if (!confirm(mensajes[tipo])) return;
+
+        try {
+            const res  = await fetch(API_PRESTAMOS + '/prestamos/' + prestamoActual.id + '/' + tipo, { method: 'PUT' });
+            const data = await res.json();
+            showMsg('mensaje-accion', res.ok ? '✅ ' + data.mensaje : '❌ ' + data.error, res.ok ? 'success' : 'danger');
+            if (res.ok) {
+                // Recargar datos del préstamo
+                setTimeout(() => {
+                    fetch(API_PRESTAMOS + '/prestamos/' + prestamoActual.id)
+                        .then(r => r.json())
+                        .then(d => { prestamoActual = d; renderPrestamo(d); renderAcciones(d); });
+                }, 800);
+            }
+        } catch { showMsg('mensaje-accion', '❌ Error de conexión', 'danger'); }
+    }
+
+    function formatFecha(f) {
+        if (!f) return '—';
+        return new Date(f).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' });
+    }
+
+    function showMsg(id, msg, tipo) {
+        const el = document.getElementById(id);
+        el.className = 'alert alert-' + tipo;
+        el.textContent = msg;
+        el.classList.remove('d-none');
+    }
+
+    document.getElementById('buscar-id').addEventListener('keypress', e => { if (e.key === 'Enter') buscarPrestamo(); });
+</script>
+</body>
+</html>
