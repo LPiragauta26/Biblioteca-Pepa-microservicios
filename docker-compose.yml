@@ -1,121 +1,191 @@
 version: '3.8'
 
-networks:
-  biblioteca-net:
-    driver: bridge
-
-volumes:
-  mysql_data:
-
 services:
 
-  mysql:
+  # MS1 - Gestión de Usuarios (puerto interno: 3001)
+  usuarios:
+    image: lpiragauta/biblioteca-usuarios
+    environment:
+      DB_HOST: usuarios-db
+      DB_USER: root
+      DB_PASSWORD: Laura
+      DB_NAME: usuarios_db
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 3
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  usuarios-db:
     image: mysql:8.0
-    container_name: biblioteca-mysql
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: Laura
-    ports:
-      - "3306:3306"
+      MYSQL_DATABASE: usuarios_db
     volumes:
-      - mysql_data:/var/lib/mysql
-      - /vagrant/microservicios/microservicios.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - usuarios-db-data:/var/lib/mysql
     networks:
       - biblioteca-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pLaura"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pLaura"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 5
+      start_period: 150s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
 
-  usuarios:
-    build: ./usuarios
-    environment:
-      DB_HOST: mysql
-      DB_PASSWORD: Laura
-      DB_NAME: usuarios_db
-    expose:
-      - "3001"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - biblioteca-net
-    restart: always
-
+  # MS2 - Gestión de Libros (puerto interno: 3002)
   libros:
-    build: ./libros
+    image: lpiragauta/biblioteca-libros
     environment:
-      DB_HOST: mysql
+      DB_HOST: libros-db
+      DB_USER: root
       DB_PASSWORD: Laura
       DB_NAME: libros_db
-    expose:
-      - "3002"
-    depends_on:
-      mysql:
-        condition: service_healthy
     networks:
       - biblioteca-net
-    restart: always
+    deploy:
+      replicas: 3
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
 
-  prestamos:
-    build: ./prestamos
+  libros-db:
+    image: mysql:8.0
     environment:
-      DB_HOST: mysql
+      MYSQL_ROOT_PASSWORD: Laura
+      MYSQL_DATABASE: libros_db
+    volumes:
+      - libros-db-data:/var/lib/mysql
+    networks:
+      - biblioteca-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pLaura"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 150s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  # MS3 - Gestión de Préstamos (puerto interno: 3003)
+  prestamos:
+    image: lpiragauta/biblioteca-prestamos
+    environment:
+      DB_HOST: prestamos-db
+      DB_USER: root
       DB_PASSWORD: Laura
       DB_NAME: prestamos_db
-    expose:
-      - "3003"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      usuarios:
-        condition: service_started
-      libros:
-        condition: service_started
+      MS1_URL: http://usuarios:3001
+      MS2_URL: http://libros:3002
     networks:
       - biblioteca-net
-    restart: always
+    deploy:
+      replicas: 3
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
 
-  admin:
-    build: ./admin
+  prestamos-db:
+    image: mysql:8.0
     environment:
-      DB_HOST: mysql
-      DB_PASSWORD: Laura
-      DB_NAME: usuarios_db
-    expose:
-      - "3004"
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - biblioteca-net
-    restart: always
-
-  haproxy:
-    image: haproxy:2.8
-    ports:
-      - "3001:3001"
-      - "3002:3002"
-      - "3003:3003"
-      - "3004:3004"
-      - "8404:8404"
+      MYSQL_ROOT_PASSWORD: Laura
+      MYSQL_DATABASE: prestamos_db
     volumes:
-      - /vagrant/microservicios/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    depends_on:
-      - usuarios
-      - libros
-      - prestamos
-      - admin
+      - prestamos-db-data:/var/lib/mysql
     networks:
       - biblioteca-net
-    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pLaura"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 150s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
 
-  frontend:
-    build: ./frontend
+  # HAProxy - Proxy inverso en MV1
+  haproxy:
+    image: haproxy:2.9-alpine
     ports:
-      - "8080:80"
+      - target: 80
+        published: 8080
+        protocol: tcp
+        mode: host
+      - target: 8404
+        published: 8404
+        protocol: tcp
+        mode: host
+    configs:
+      - source: haproxy_cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
     networks:
       - biblioteca-net
-    restart: always
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+# Configuraciones
+configs:
+  haproxy_cfg:
+    file: ./haproxy/haproxy.cfg
+
+# Volúmenes persistentes
+volumes:
+  usuarios-db-data:
+    driver: local
+  libros-db-data:
+    driver: local
+  prestamos-db-data:
+    driver: local
+
+# Red overlay compartida entre todos los nodos del Swarm
+networks:
+  biblioteca-net:
+    driver: overlay
+    attachable: true
