@@ -1,0 +1,12 @@
+services:
+  spark-analisis:
+    image: apache/spark:3.5.0
+    user: root
+    volumes:
+      - /vagrant/biblioteca_dataset:/data:ro
+      - /vagrant/spark:/spark
+      - /vagrant/spark/resultados:/resultados
+    command: >
+      /opt/spark/bin/spark-submit
+      --master local[*]
+      /spark/analisis.py
