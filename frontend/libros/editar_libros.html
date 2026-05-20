@@ -98,6 +98,7 @@
         Aplicación desarrollada para el curso de Redes e Infraestructura 2026
     </div>
 
+    <script src="../config.js"></script>
     <script>
         let codigoActual = null;
 
@@ -112,7 +113,7 @@
                 return;
             }
 
-            fetch('' + API_LIBROS + '/libros/codigo/' + codigo)
+            fetch('' + API_LIBROS + '/libros/' + codigo)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -146,7 +147,7 @@
             const genero = document.getElementById('genero').value;
             const cantidad = document.getElementById('cantidad_disponible').value;
 
-            fetch('' + API_LIBROS + '/libros/codigo/' + codigoActual, {
+            fetch('' + API_LIBROS + '/libros/' + codigoActual, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ titulo, autor, genero, cantidad_disponible: parseInt(cantidad) })
@@ -167,6 +168,6 @@
         }
     </script>
 
-<script src="../config.js"></script>
+
 </body>
 </html>

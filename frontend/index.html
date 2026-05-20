@@ -171,7 +171,7 @@
 
     fetch(API_PRESTAMOS + '/prestamos')
         .then(r => r.json())
-        .then(d => setStatus('prestamos', true, Array.isArray(d) ? d.filter(p => p.estado === 'activo').length : '?'))
+        .then(d => setStatus('prestamos', true, Array.isArray(d) ? d.filter(p => p.estado === 'pendiente').length : '?'))
         .catch(() => setStatus('prestamos', false, '—'));
 </script>
 </body>

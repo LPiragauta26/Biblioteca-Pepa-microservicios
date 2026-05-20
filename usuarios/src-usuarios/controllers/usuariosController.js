@@ -39,10 +39,10 @@ router.post('/login', async (req, res) => {
 // 4. REGISTRO — crea usuario normal
 router.post('/usuarios', async (req, res) => {
     try {
-        const { nombre, email, usuario, password } = req.body;
+        const { nombre, apellido, correo, usuario, password, telefono } = req.body;
         const existe = await usuariosModel.traerUsuario(usuario);
         if (existe[0]) return res.status(400).json({ error: "El nombre de usuario ya está en uso" });
-        await usuariosModel.crearUsuario(nombre, email, usuario, password);
+        await usuariosModel.crearUsuario(nombre, apellido, correo, usuario, password, telefono);
         res.status(201).json({ mensaje: "Usuario creado con éxito" });
     } catch (error) {
         res.status(500).json({ error: "Error al crear usuario" });
@@ -53,8 +53,8 @@ router.post('/usuarios', async (req, res) => {
 router.put('/usuarios/:usuario', async (req, res) => {
     try {
         const { usuario } = req.params;
-        const { nombre, email, password } = req.body;
-        await usuariosModel.editarUsuario(usuario, nombre, email, password);
+        const { nombre, apellido, correo, password, telefono, estado, rol } = req.body;
+        await usuariosModel.editarUsuario(usuario, nombre, apellido, correo, password, telefono, estado, rol);
         res.status(200).json({ mensaje: "Usuario actualizado con éxito" });
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar usuario" });

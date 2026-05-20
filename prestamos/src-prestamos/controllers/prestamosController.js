@@ -18,6 +18,21 @@ router.get('/prestamos', async (req, res) => {
     }
 });
 
+router.get('/prestamos/conteos', async (req, res) => {
+    try {
+        const pendientes   = await prestamosModel.obtenerPrestamosPorEstado('pendiente');
+        const vencidos     = await prestamosModel.obtenerPrestamosPorEstado('vencido');
+        const devoluciones = await prestamosModel.obtenerSolicitudesDevolucion();
+        res.status(200).json({
+            pendientes:   pendientes.length,
+            vencidos:     vencidos.length,
+            devoluciones: devoluciones.length
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error al obtener conteos" });
+    }
+});
+
 router.get('/prestamos/pendientes', async (req, res) => {
     try {
         const result = await prestamosModel.obtenerPrestamosPorEstado('pendiente');

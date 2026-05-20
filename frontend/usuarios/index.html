@@ -84,8 +84,9 @@
     </div>
 </div>
 <div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+
 <script src="../config.js"></script>
-<script>
+    <script>
     fetch(API_USUARIOS + '/usuarios')
         .then(r => r.json())
         .then(d => document.getElementById('num-total').textContent = Array.isArray(d) ? d.length : '?')

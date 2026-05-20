@@ -58,12 +58,12 @@ async function obtenerSolicitudesDevolucion() {
 // ============================================================
 
 // Crea préstamo en estado PENDIENTE (usuario solicita, admin aprueba)
-async function crearPrestamo(usuario, nombre_usuario, email_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion) {
+async function crearPrestamo(usuario, nombre_usuario, correo_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion) {
     const [result] = await connection.query(
         `INSERT INTO prestamos 
-        (usuario, nombre_usuario, email_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion, estado)
+        (usuario, nombre_usuario, correo_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion, estado)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')`,
-        [usuario, nombre_usuario, email_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion]
+        [usuario, nombre_usuario, correo_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion]
     );
     return result;
 }
@@ -135,14 +135,14 @@ async function marcarVencidos() {
 //  EDITAR Y ELIMINAR
 // ============================================================
 
-async function editarPrestamos(id, usuario, nombre_usuario, email_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion, estado) {
+async function editarPrestamos(id, usuario, nombre_usuario, correo_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion, estado) {
     const [result] = await connection.query(
         `UPDATE prestamos SET 
-            usuario = ?, nombre_usuario = ?, email_usuario = ?,
+            usuario = ?, nombre_usuario = ?, correo_usuario = ?,
             codigo_libro = ?, titulo_libro = ?, tipo_prestamo = ?,
             fecha_prestamo = ?, fecha_devolucion = ?, estado = ?
          WHERE id = ?`,
-        [usuario, nombre_usuario, email_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion, estado, id]
+        [usuario, nombre_usuario, correo_usuario, codigo_libro, titulo_libro, tipo_prestamo, fecha_prestamo, fecha_devolucion, estado, id]
     );
     return result;
 }

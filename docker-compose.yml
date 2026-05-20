@@ -33,6 +33,9 @@ services:
       MYSQL_DATABASE: usuarios_db
     volumes:
       - usuarios-db-data:/var/lib/mysql
+    configs:
+      - source: sql_usuarios
+        target: /docker-entrypoint-initdb.d/init.sql
     networks:
       - biblioteca-net
     healthcheck:
@@ -80,6 +83,9 @@ services:
       MYSQL_DATABASE: libros_db
     volumes:
       - libros-db-data:/var/lib/mysql
+    configs:
+      - source: sql_libros
+        target: /docker-entrypoint-initdb.d/init.sql
     networks:
       - biblioteca-net
     healthcheck:
@@ -129,6 +135,9 @@ services:
       MYSQL_DATABASE: prestamos_db
     volumes:
       - prestamos-db-data:/var/lib/mysql
+    configs:
+      - source: sql_prestamos
+        target: /docker-entrypoint-initdb.d/init.sql
     networks:
       - biblioteca-net
     healthcheck:
@@ -145,7 +154,7 @@ services:
       restart_policy:
         condition: on-failure
 
-  # HAProxy - Proxy inverso en MV1
+  # HAProxy - Proxy inverso (manager)
   haproxy:
     image: haproxy:2.9-alpine
     ports:
@@ -170,10 +179,34 @@ services:
       restart_policy:
         condition: on-failure
 
+  # Frontend - Nginx (worker)
+  frontend:
+    image: lpiragauta/biblioteca-frontend
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+    networks:
+      - biblioteca-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+
 # Configuraciones
 configs:
   haproxy_cfg:
     file: ./haproxy/haproxy.cfg
+  sql_usuarios:
+    file: ./usuarios/sql/init.sql
+  sql_libros:
+    file: ./libros/sql/init.sql
+  sql_prestamos:
+    file: ./prestamos/sql/init.sql
 
 # Volúmenes persistentes
 volumes:

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Spark — Biblioteca</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+  h1 { text-align: center; color: #2c3e50; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: auto; }
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .card h2 { color: #34495e; font-size: 1rem; margin-bottom: 15px; }
+  .stat { text-align: center; font-size: 2.5rem; font-weight: bold; color: #2980b9; }
+  .stat-label { text-align: center; color: #7f8c8d; font-size: 0.9rem; }
+  .full { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<h1>📊 Dashboard de Análisis — Apache Spark</h1>
+<div class="grid">
+
+  <div class="card">
+    <h2>🏆 Top 10 Libros más Prestados</h2>
+    <canvas id="chartLibros"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>📚 Géneros más Populares</h2>
+    <canvas id="chartGeneros"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>📋 Estado de Préstamos</h2>
+    <canvas id="chartEstados"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>🚚 Tipos de Préstamo</h2>
+    <canvas id="chartTipos"></canvas>
+  </div>
+
+  <div class="card full">
+    <h2>👥 Usuarios más Activos</h2>
+    <canvas id="chartUsuarios"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="stat" id="totalMultas">...</div>
+    <div class="stat-label">💰 Total Multas Generadas (COP)</div>
+  </div>
+
+  <div class="card">
+    <div class="stat" id="totalPrestamos">...</div>
+    <div class="stat-label">📖 Total Préstamos Procesados por Spark</div>
+  </div>
+
+</div>
+
+<script>
+fetch('/reporte.json')
+  .then(r => r.json())
+  .then(data => {
+
+    // Total multas
+    document.getElementById('totalMultas').textContent =
+      '$' + data.total_multas.toLocaleString('es-CO');
+
+    // Total préstamos
+    const total = data.estados_prestamos.reduce((a, b) => a + b.total, 0);
+    document.getElementById('totalPrestamos').textContent =
+      total.toLocaleString('es-CO');
+
+    // Top libros
+    new Chart(document.getElementById('chartLibros'), {
+      type: 'bar',
+      data: {
+        labels: data.top_libros.map(d => d.titulo_libro),
+        datasets: [{ label: 'Préstamos', data: data.top_libros.map(d => d.total_prestamos),
+          backgroundColor: '#3498db' }]
+      },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+
+    // Géneros
+    new Chart(document.getElementById('chartGeneros'), {
+      type: 'doughnut',
+      data: {
+        labels: data.top_generos.map(d => d.genero),
+        datasets: [{ data: data.top_generos.map(d => d.total),
+          backgroundColor: ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6',
+                            '#1abc9c','#e67e22','#34495e','#e91e63','#00bcd4'] }]
+      }
+    });
+
+    // Estados
+    new Chart(document.getElementById('chartEstados'), {
+      type: 'pie',
+      data: {
+        labels: data.estados_prestamos.map(d => d.estado),
+        datasets: [{ data: data.estados_prestamos.map(d => d.total),
+          backgroundColor: ['#2ecc71','#3498db','#f39c12','#e74c3c','#95a5a6'] }]
+      }
+    });
+
+    // Tipos
+    new Chart(document.getElementById('chartTipos'), {
+      type: 'bar',
+      data: {
+        labels: data.tipos_prestamo.map(d => d.tipo_prestamo),
+        datasets: [{ label: 'Total', data: data.tipos_prestamo.map(d => d.total),
+          backgroundColor: ['#9b59b6','#1abc9c','#e67e22'] }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    // Usuarios
+    new Chart(document.getElementById('chartUsuarios'), {
+      type: 'bar',
+      data: {
+        labels: data.top_usuarios.map(d => d.nombre_usuario),
+        datasets: [{ label: 'Préstamos', data: data.top_usuarios.map(d => d.total_prestamos),
+          backgroundColor: '#e74c3c' }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+  });
+</script>
+</body>
+</html>

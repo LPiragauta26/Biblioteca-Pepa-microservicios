@@ -1,0 +1,165 @@
+{
+  "top_libros": [
+    {
+      "titulo_libro": "Crepúsculo",
+      "total_prestamos": 299
+    },
+    {
+      "titulo_libro": "El diario de Ana Frank",
+      "total_prestamos": 298
+    },
+    {
+      "titulo_libro": "El corazón helado",
+      "total_prestamos": 298
+    },
+    {
+      "titulo_libro": "El conde de Montecristo",
+      "total_prestamos": 292
+    },
+    {
+      "titulo_libro": "El beso de la mujer araña",
+      "total_prestamos": 292
+    },
+    {
+      "titulo_libro": "Boquitas pintadas",
+      "total_prestamos": 291
+    },
+    {
+      "titulo_libro": "La guerra del fin del mundo",
+      "total_prestamos": 290
+    },
+    {
+      "titulo_libro": "La hojarasca",
+      "total_prestamos": 289
+    },
+    {
+      "titulo_libro": "El extranjero",
+      "total_prestamos": 287
+    },
+    {
+      "titulo_libro": "Lituma en los Andes",
+      "total_prestamos": 287
+    }
+  ],
+  "top_generos": [
+    {
+      "genero": "Drama",
+      "total": 9403
+    },
+    {
+      "genero": "Histórico",
+      "total": 5162
+    },
+    {
+      "genero": "Romance",
+      "total": 3608
+    },
+    {
+      "genero": "Fantasía",
+      "total": 2848
+    },
+    {
+      "genero": "Ciencia ficción",
+      "total": 2602
+    },
+    {
+      "genero": "Thriller",
+      "total": 2367
+    },
+    {
+      "genero": "Filosofía",
+      "total": 2358
+    },
+    {
+      "genero": "Misterio",
+      "total": 2273
+    },
+    {
+      "genero": "Aventura",
+      "total": 1795
+    },
+    {
+      "genero": "Humor",
+      "total": 1739
+    }
+  ],
+  "top_usuarios": [
+    {
+      "nombre_usuario": "Carlos Díaz",
+      "total_prestamos": 113
+    },
+    {
+      "nombre_usuario": "Miguel Sánchez",
+      "total_prestamos": 113
+    },
+    {
+      "nombre_usuario": "Valentina Hernández",
+      "total_prestamos": 110
+    },
+    {
+      "nombre_usuario": "José Giraldo",
+      "total_prestamos": 110
+    },
+    {
+      "nombre_usuario": "Juan Muñoz",
+      "total_prestamos": 108
+    },
+    {
+      "nombre_usuario": "Ana Moreno",
+      "total_prestamos": 108
+    },
+    {
+      "nombre_usuario": "Andrés Moreno",
+      "total_prestamos": 107
+    },
+    {
+      "nombre_usuario": "María Martínez",
+      "total_prestamos": 106
+    },
+    {
+      "nombre_usuario": "Daniela González",
+      "total_prestamos": 106
+    },
+    {
+      "nombre_usuario": "David Henao",
+      "total_prestamos": 105
+    }
+  ],
+  "estados_prestamos": [
+    {
+      "estado": "devuelto",
+      "total": 30182
+    },
+    {
+      "estado": "activo",
+      "total": 7458
+    },
+    {
+      "estado": "pendiente",
+      "total": 5020
+    },
+    {
+      "estado": "vencido",
+      "total": 4926
+    },
+    {
+      "estado": "anulado",
+      "total": 2414
+    }
+  ],
+  "tipos_prestamo": [
+    {
+      "tipo_prestamo": "domiciliario",
+      "total": 29920
+    },
+    {
+      "tipo_prestamo": "sala",
+      "total": 15064
+    },
+    {
+      "tipo_prestamo": "convenio",
+      "total": 5016
+    }
+  ],
+  "total_multas": 15462600.0
+}

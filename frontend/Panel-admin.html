@@ -139,7 +139,9 @@
                 <h5>Préstamos <span class="badge bg-success" style="font-size:11px;">:3003</span></h5>
                 <p>Registro y control de préstamos.</p>
                 <a href="prestamos/ver_prestamos.html"      class="btn-opcion">📋 Ver todos</a>
-                <a href="prestamos/consultar_prestamos.html" class="btn-opcion">🔍 Consultar por usuario</a>
+                <a href="prestamos/insertar_prestamos.html" class="btn-opcion">➕ Insertar</a>
+                <a href="prestamos/consultar_prestamos.html" class="btn-opcion">🔍 Consultar por ID</a>
+                <a href="prestamos/editar_prestamos.html"   class="btn-opcion">✏️ Editar</a>
                 <a href="prestamos/borrar_prestamos.html"   class="btn-opcion danger">🗑️ Eliminar</a>
             </div>
         </div>
@@ -183,7 +185,7 @@
     </div>
 </div>
 
-<div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
+<div style="text-align:center;margin:20px 0;"><a href="dashboard.html" target="_blank" style="background:#2c3e50;color:white;padding:12px 30px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:15px;">📊 Ver Dashboard de Análisis Spark</a></div><div class="footer">Aplicación desarrollada para el curso de Redes e Infraestructura 2026</div>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -216,27 +218,20 @@
         .then(d => setStatus('libros', true, Array.isArray(d) ? d.length : '?'))
         .catch(() => setStatus('libros', false, '—'));
 
-    fetch(API_PRESTAMOS + '/prestamos')
-        .then(r => r.json())
-        .then(d => {
-            if (!Array.isArray(d)) return;
-            const activos    = d.filter(p => p.estado === 'activo').length;
-            const pendientes = d.filter(p => p.estado === 'pendiente').length;
-            const vencidos   = d.filter(p => p.estado === 'vencido').length;
-            const devoluciones = d.filter(p => p.solicitud_devolucion && ['activo','vencido'].includes(p.estado)).length;
-
-            setStatus('activos', true, activos);
-            document.getElementById('num-alertas').textContent      = pendientes + vencidos;
-            document.getElementById('badge-pendientes').textContent  = pendientes;
-            document.getElementById('badge-vencidos').textContent    = vencidos;
-            document.getElementById('badge-devoluciones').textContent = devoluciones;
-            document.getElementById('dot-prestamos').className       = 'status-dot status-ok';
-            document.getElementById('status-prestamos').textContent  = 'Conectado ✓';
-        })
-        .catch(() => {
-            document.getElementById('dot-prestamos').className      = 'status-dot status-err';
-            document.getElementById('status-prestamos').textContent = 'Sin conexión';
-        });
+    fetch(API_PRESTAMOS + '/prestamos/conteos')
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('num-activos').textContent       = d.pendientes;
+        document.getElementById('num-alertas').textContent       = d.pendientes + d.vencidos;
+        document.getElementById('badge-pendientes').textContent  = d.pendientes;
+        document.getElementById('badge-vencidos').textContent    = d.vencidos;
+        document.getElementById('badge-devoluciones').textContent = d.devoluciones;
+        document.getElementById('dot-prestamos').className       = 'status-dot status-ok';
+        document.getElementById('status-prestamos').textContent  = 'Conectado ✓';
+    }).catch(() => {
+        document.getElementById('dot-prestamos').className      = 'status-dot status-err';
+        document.getElementById('status-prestamos').textContent = 'Sin conexión';
+    });
 </script>
 </body>
 </html>

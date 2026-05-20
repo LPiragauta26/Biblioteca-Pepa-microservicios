@@ -3,6 +3,7 @@ version: '3.8'
 networks:
   biblioteca-net:
     driver: overlay
+    attachable: true
 
 volumes:
   mysql_data:
@@ -34,7 +35,7 @@ services:
       retries: 5
 
   # =========================
-  # Microservicio Usuarios
+  # Microservicio Usuarios (puerto interno: 3001)
   # =========================
   usuarios:
     image: lpiragauta/biblioteca-usuarios:latest
@@ -47,11 +48,19 @@ services:
       - biblioteca-net
     deploy:
       replicas: 3
+      endpoint_mode: dnsrr
+      placement:
+        constraints: [node.role == worker]
       restart_policy:
         condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
 
   # =========================
-  # Microservicio Libros
+  # Microservicio Libros (puerto interno: 3002)
   # =========================
   libros:
     image: lpiragauta/biblioteca-libros:latest
@@ -64,11 +73,19 @@ services:
       - biblioteca-net
     deploy:
       replicas: 3
+      endpoint_mode: dnsrr
+      placement:
+        constraints: [node.role == worker]
       restart_policy:
         condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
 
   # =========================
-  # Microservicio Préstamos
+  # Microservicio Préstamos (puerto interno: 3003)
   # =========================
   prestamos:
     image: lpiragauta/biblioteca-prestamos:latest
@@ -77,15 +94,25 @@ services:
       DB_USER: root
       DB_PASSWORD: Laura
       DB_NAME: prestamos_db
+      MS1_URL: http://usuarios:3001
+      MS2_URL: http://libros:3002
     networks:
       - biblioteca-net
     deploy:
       replicas: 3
+      endpoint_mode: dnsrr
+      placement:
+        constraints: [node.role == worker]
       restart_policy:
         condition: on-failure
+        delay: 15s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
 
   # =========================
-  # Microservicio Admin
+  # Microservicio Admin (puerto interno: 3004)
   # =========================
   admin:
     image: lpiragauta/biblioteca-admin:latest
@@ -98,22 +125,31 @@ services:
       - biblioteca-net
     deploy:
       replicas: 1
+      endpoint_mode: dnsrr
+      placement:
+        constraints: [node.role == worker]
       restart_policy:
         condition: on-failure
 
   # =========================
   # Balanceador HAProxy
+  # Punto de entrada único para las APIs (/api/*)
+  # Puerto 80 → enrutamiento por ruta hacia MS
+  # Puerto 8404 → dashboard de estadísticas
   # =========================
   haproxy:
-    image: haproxy:2.8
+    image: haproxy:2.9-alpine
     ports:
-      - "3001:3001"
-      - "3002:3002"
-      - "3003:3003"
-      - "3004:3004"
-      - "8404:8404"
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 8404
+        published: 8404
+        protocol: tcp
+        mode: host
     volumes:
-      - /vagrant/microservicios/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - /vagrant/microservicios/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     networks:
       - biblioteca-net
     deploy:
@@ -124,17 +160,20 @@ services:
         condition: on-failure
 
   # =========================
-  # Frontend
+  # Frontend Nginx
+  # Sirve los archivos estáticos HTML/JS
+  # Puerto 8080 en el host
   # =========================
   frontend:
     image: lpiragauta/biblioteca-frontend:latest
     ports:
-      - "8080:80"
+      - target: 80
+        published: 8080
+        protocol: tcp
+        mode: ingress
     networks:
       - biblioteca-net
     deploy:
       replicas: 1
-      placement:
-        constraints: [node.role == manager]
       restart_policy:
         condition: on-failure

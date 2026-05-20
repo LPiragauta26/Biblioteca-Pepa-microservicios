@@ -36,6 +36,14 @@ async function actualizarLibro(codigo, cantidad_disponible) {
     return result;
 }
 
+async function actualizarLibroCompleto(codigo, titulo, autor, genero, cantidad_disponible) {
+    const result = await connection.query(
+        'UPDATE libros SET titulo=?, autor=?, genero=?, cantidad_disponible=? WHERE codigo=?',
+        [titulo, autor, genero, cantidad_disponible, codigo]
+    );
+    return result;
+}
+
 async function eliminarLibro(codigo) {
     const result = await connection.query(
         'DELETE FROM libros WHERE codigo = ?', [codigo]
@@ -48,5 +56,6 @@ module.exports = {
     traerLibro,
     crearLibro,
     actualizarLibro,
+    actualizarLibroCompleto,
     eliminarLibro
 };

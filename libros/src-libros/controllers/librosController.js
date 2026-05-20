@@ -24,16 +24,16 @@ router.get('/libros/:codigo', async (req, res) => {
     }
 });
 
-// 3. ACTUALIZAR CANTIDAD DISPONIBLE (PUT)
+// 3. ACTUALIZAR LIBRO COMPLETO (PUT)
 router.put('/libros/:codigo', async (req, res) => {
     try {
         const { codigo } = req.params;
-        const { cantidad_disponible } = req.body;
-        if (cantidad_disponible < 0) {
+        const { titulo, autor, genero, cantidad_disponible } = req.body;
+        if (cantidad_disponible !== undefined && cantidad_disponible < 0) {
             return res.status(400).json({ error: "La cantidad disponible no puede ser menor de cero" });
         }
-        await librosModel.actualizarLibro(codigo, cantidad_disponible);
-        res.status(200).json({ mensaje: "Cantidad disponible actualizada" });
+        await librosModel.actualizarLibroCompleto(codigo, titulo, autor, genero, cantidad_disponible);
+        res.status(200).json({ mensaje: "Libro actualizado con exito" });
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar libro" });
     }
