@@ -108,30 +108,25 @@ Dashboard HTML
 # Estructura del Proyecto
 
 ```text
-biblioteca-pepa/
+Biblioteca-Pepa-microservicios/
 │
-├── microservicios/
-│   ├── usuarios/
-│   ├── libros/
-│   ├── prestamos/
-│   ├── admin/
-│   ├── haproxy/
-│   └── docker-compose.swarm.yml
-│
-├── spark/
-│   ├── dataset/
-│   │   └── sistema_biblioteca.csv
-│   ├── scripts/
-│   │   ├── analisis_libros.py
-│   │   ├── analisis_usuarios.py
-│   │   └── dashboard_generator.py
-│   ├── resultados/
-│   └── docker-compose.spark.yml
-│
+├── admin/
 ├── frontend/
-│
+├── haproxy/
+├── libros/
+├── prestamos/
+├── usuarios/
+├── spark/
+├── Pruebas JMeter/
+│   ├── prueba_balanceo.jmx
+│   ├── prueba_carga_normal.jmx
+│   └── prueba_estres.jmx
 ├── Vagrantfile
-│
+├── docker-compose.yml
+├── docker-compose.swarm.yml
+├── microservicios.sql
+├── BibliotecaPepa IEEE 2026.docx
+├── BibliotecaPepa_Presentacion.pptx.pdf
 └── README.md
 ```
 
