@@ -275,3 +275,4 @@ El proyecto integra conceptos de:
 * Analítica y visualización de información
 
 con el fin de construir una plataforma escalable y modular para la gestión y análisis de un sistema bibliotecario.
+
