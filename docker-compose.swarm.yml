@@ -63,7 +63,7 @@ services:
   # Microservicio Libros (puerto interno: 3002)
   # =========================
   libros:
-    image: lpiragauta/biblioteca-libros:latest
+    image: lpiragauta/biblioteca-libros:latest@sha256:611d1a69c23cc821ba7cf07508f5b807aaa0c5a14a0cc8cd6d377c2738f8ca5f
     environment:
       DB_HOST: mysql
       DB_USER: root
@@ -88,7 +88,7 @@ services:
   # Microservicio Préstamos (puerto interno: 3003)
   # =========================
   prestamos:
-    image: lpiragauta/biblioteca-prestamos:latest
+    image: lpiragauta/biblioteca-prestamos:latest@sha256:31caa02d589991c5d984362528d2635246396bcd6e1c7e2d92b75109a5b4e1a3
     environment:
       DB_HOST: mysql
       DB_USER: root

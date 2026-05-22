@@ -1,11 +1,11 @@
 const mysql = require('mysql2/promise');
-
 const connection = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: 'root',
     password: process.env.DB_PASSWORD || 'Laura',
     database: process.env.DB_NAME || 'prestamos_db',
-    port: 3306
+    port: 3306,
+    charset: 'utf8mb4'
 });
 
 // ============================================================

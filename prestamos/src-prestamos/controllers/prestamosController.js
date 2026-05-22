@@ -120,7 +120,7 @@ router.put('/prestamos/:id/aprobar', async (req, res) => {
         const { cantidad_disponible } = responseLibro.data;
         if (cantidad_disponible <= 0) return res.status(400).json({ error: 'Sin stock disponible' });
         await prestamosModel.cambiarEstado(id, 'activo');
-        await axios.put(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
+        await axios.patch(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
             cantidad_disponible: cantidad_disponible - 1
         });
         res.status(200).json({ mensaje: "Préstamo aprobado. Stock actualizado." });
@@ -151,7 +151,7 @@ router.put('/prestamos/:id/anular', async (req, res) => {
         const responseLibro = await axios.get(`http://libros:3002/libros/${prestamo.codigo_libro}`);
         const { cantidad_disponible } = responseLibro.data;
         await prestamosModel.cambiarEstado(id, 'anulado');
-        await axios.put(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
+        await axios.patch(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
             cantidad_disponible: cantidad_disponible + 1
         });
         res.status(200).json({ mensaje: "Préstamo anulado. Stock restaurado." });
@@ -169,7 +169,7 @@ router.put('/prestamos/:id/confirmar-devolucion', async (req, res) => {
         const responseLibro = await axios.get(`http://libros:3002/libros/${prestamo.codigo_libro}`);
         const { cantidad_disponible } = responseLibro.data;
         await prestamosModel.confirmarDevolucion(id);
-        await axios.put(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
+        await axios.patch(`http://libros:3002/libros/${prestamo.codigo_libro}`, {
             cantidad_disponible: cantidad_disponible + 1
         });
         res.status(200).json({ mensaje: "Devolución confirmada. Stock restaurado." });

@@ -7,7 +7,8 @@ const db = mysql.createConnection({
   host: process.env.DB_HOST || 'mysql',
   user: 'root',
   password: process.env.DB_PASSWORD || 'Laura',
-  database: process.env.DB_NAME || 'admin_db'
+  database: process.env.DB_NAME || 'admin_db',
+  charset: 'utf8mb4'
 });
 
 app.use(express.json());
